@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+# SRPFFrontend: Starts the SRPF Frontend
+#
+# chkconfig:   345 80 02
+# description: ... \
+#              ...
+# processname: java -jar /opt/SRPF/FrontEnd/receiver.jar
+
+### BEGIN INIT INFO
+# Provides:          SRPF Frontend
+# Required-Start:    $local_fs $network $syslog cmhelper
+# Required-Stop:     $local_fs $syslog
+# Should-Start:      $syslog
+# Should-Stop:       $syslog
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Short-Description: Starts the SRPF Frontend
+# Description:       
+#                    
+### END INIT INFO
+
+SRPFUSER=srpf
+JAR=srpffrontend.jar
+CMD=/opt/SRPF/FrontEnd/startFrontend.sh
+
+
+# Source function library.
+if [ -r /etc/init.d/functions ]; then
+  . /etc/init.d/functions
+elif [ -r /lib/lsb/init-functions ]; then
+  . /lib/lsb/init-functions
+else
+  echo "Unsupported!"
+  exit -1
+fi
+
+RETVAL=0
+
+base=${0##*/}
+
+start() {
+        ps -ef | grep $JAR | grep -v grep > /dev/null 2> /dev/null
+	RETVAL=$?
+	if [ $RETVAL -eq 0 ]; then
+                echo "An instance of frontend already runninng"
+		exit 0
+	fi
+	echo -n $"Starting SRPF Frontend ... "
+	su - $SRPFUSER -c "$CMD > /dev/null 2>/dev/null &"
+	RETVAL=$?
+	echo
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Shutting down SRPF Frontend: "
+	kill -15 `ps -alef | grep $JAR | grep -v grep | awk '{print $4}'` >/dev/null 2>/dev/null
+	RETVAL=$?
+	echo
+	return $RETVAL
+}
+
+status() {
+	echo -n $"SRPF Frontend status: "
+	ps -ef | grep $JAR | grep -v grep > /dev/null 2> /dev/null
+	RETVAL=$?
+	if [ $RETVAL -eq 0 ]; then
+		echo "running"
+	else
+		echo "stopped"
+	fi
+	return $RETVAL
+}
+
+restart() {
+	stop
+	ps -ef | grep $JAR | grep -v grep > /dev/null 2> /dev/null
+        COUNTER=5
+        RETVAL=$?
+        while [ $RETVAL -eq 0 ]; do
+                let COUNTER=COUNTER-1
+                sleep 1
+                if [ $COUNTER -eq 0 ]
+                then
+                        break
+                fi
+                ps -ef | grep $JAR | grep -v grep > /dev/null 2> /dev/null
+                RETVAL=$?
+        done
+
+	start
+}
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+	status
+        RETVAL=$?
+	;;
+  restart)
+	restart
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart}"
+	exit 2
+        ;;
+esac
+
+exit $RETVAL

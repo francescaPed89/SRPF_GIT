@@ -1,0 +1,10 @@
+com\telespazio\csg\srpf\logging\constants\EventSeverity.class
+com\telespazio\csg\srpf\logging\CommonFieldsManager.class
+com\telespazio\csg\srpf\logging\exceptions\LoggerConfigurationException.class
+com\telespazio\csg\srpf\logging\TraceManager.class
+com\telespazio\csg\srpf\logging\constants\TraceType.class
+com\telespazio\csg\srpf\logging\constants\SpecificProblem.class
+com\telespazio\csg\srpf\logging\EventManager.class
+com\telespazio\csg\srpf\logging\constants\ProbableCause.class
+com\telespazio\csg\srpf\logging\constants\LogMisc.class
+com\telespazio\csg\srpf\logging\constants\EventType.class

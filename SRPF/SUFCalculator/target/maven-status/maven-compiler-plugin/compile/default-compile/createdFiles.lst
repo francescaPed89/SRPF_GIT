@@ -1,0 +1,5 @@
+com\telespazio\csg\srpf\suf\CSGBicParameters.class
+com\telespazio\csg\srpf\suf\QUMConstants.class
+com\telespazio\csg\srpf\suf\SUFCalculator.class
+com\telespazio\csg\srpf\suf\SUFCalculator$SUFCalculatorHelper.class
+com\telespazio\csg\srpf\suf\SUFCalculatorTest.class

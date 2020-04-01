@@ -1,0 +1,90 @@
+#!/bin/sh
+#
+# Tomcat: Starts Apache Tomcat
+#
+# chkconfig:   345 80 02
+# description: ... \
+#              ...
+# processname: tomcat
+
+### BEGIN INIT INFO
+# Should-Start:      $syslog $network $local_fs 
+# Should-Stop:       $syslog $local_fs 
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Short-Description: Starts Apache Tomcat
+# Description:       
+#                    
+### END INIT INFO
+
+SRPFUSER=srpf
+TOMCAT_START_SCRIPT=/opt/SRPF/BackEnd/startBackend.sh
+TOMCAT_STOP_SCRIPT=/opt/SRPF/BackEnd/stopBackend.sh
+#TOMCAT_STOP_SCRIPT=/opt/SRPF/BackEnd/apache-tomcat-8.0.28/bin/shutdown.sh
+
+# Source function library.
+. /etc/init.d/functions
+
+RETVAL=0
+
+base=${0##*/}
+
+start() {
+	echo -n $"Starting Apache Tomcat ... "
+	umount /opt/SRPF/working_dir/  >/dev/null 2>&1
+	mount /opt/SRPF/working_dir/  >/dev/null 2>&1
+	su - $SRPFUSER -c "$TOMCAT_START_SCRIPT "
+	RETVAL=$?
+	echo
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Shutting down Apache Tomcat: "
+	su - $SRPFUSER -c "$TOMCAT_STOP_SCRIPT "
+	RETVAL=$?
+	echo
+	return $RETVAL
+}
+
+status() {
+	echo -n $"Tomcat status: "
+	ps -ef | grep "org.apache.catalina.startup.Bootstrap" | grep -v "grep" > /dev/null 2> /dev/null
+	RETVAL=$?
+	if [ $RETVAL -eq 0 ]; then
+		echo "running"
+	else
+		echo "stopped"
+	fi
+	return $RETVAL
+}
+
+#restart() {
+#	stop
+#	start
+#}
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+	status
+        RETVAL=$?
+	;;
+# restart)
+#	restart
+#	;;
+  *)
+	echo $"Usage: $0 {start|stop|status}"
+	exit 2
+        ;;
+esac
+
+exit $RETVAL

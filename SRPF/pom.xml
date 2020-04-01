@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+ 
+  <groupId>com.telespazio.csg</groupId>
+  <artifactId>SRPF</artifactId>
+  <version>2.2.8p</version>
+  <packaging>pom</packaging>
+ <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+ 
+  <modules>
+    <module>S-RPFUtils</module>
+    <module>CSGLogging</module>
+    <module>DSMTReporter</module>
+    <!--
+    <module>CMSimSender</module>
+    <module>DSMT-STUB</module>
+    -->
+    <module>DEMManager</module>
+    <module>SUFCalculator</module>
+    <module>S-RPFFrontend</module>
+    <module>DataManager</module>
+    <module>FeasibilityPerformer</module>
+    <module>S-RPFBackend</module>
+    <module>DBUtils</module>
+  </modules>
+</project>

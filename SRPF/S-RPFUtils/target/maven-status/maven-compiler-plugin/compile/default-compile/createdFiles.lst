@@ -1,0 +1,8 @@
+com\telespazio\csg\srpf\utils\NumericUtils.class
+com\telespazio\csg\srpf\utils\PropertiesReader$1.class
+com\telespazio\csg\srpf\utils\ReferenceFrameUtils.class
+com\telespazio\csg\srpf\utils\DateUtils.class
+com\telespazio\csg\srpf\utils\XMLUtils.class
+com\telespazio\csg\srpf\utils\Checksum.class
+com\telespazio\csg\srpf\utils\PropertiesReader.class
+com\telespazio\csg\srpf\utils\PropertiesReader$PropertiesReaderHelper.class

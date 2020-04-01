@@ -1,0 +1,5 @@
+com\telespazio\csg\srpf\backend\EphemeridSynchronixer.class
+com\telespazio\csg\srpf\backend\WSControllerConstants.class
+com\telespazio\csg\srpf\backend\SrpfBackendException.class
+com\telespazio\csg\srpf\backend\BackendStarter.class
+com\telespazio\csg\srpf\backend\WSController.class

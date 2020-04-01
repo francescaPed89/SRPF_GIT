@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" name="CSG" >
+	<CustomLevels>
+		<CustomLevel name="Major" intLevel="150" />
+		<CustomLevel name="Minor" intLevel="250" />
+		<CustomLevel name="Cleared" intLevel="350" />
+	</CustomLevels>
+    <Appenders>
+        <Syslog name="Syslog" format="RFC5424" host="localhost" port="514"
+            protocol="UDP" appName="CSG" includeMDC="true"
+            facility="LOCAL6" enterpriseNumber="18060" newLine="true"
+            messageId="Audit" mdcId="mdc" id="App"
+            connectTimeoutMillis="1000" reconnectionDelayMillis="5000">
+            <LoggerFields>
+                <KeyValuePair key="priority" value="%p{INFO=Information, FATAL=Critical, WARN=Warning}"/>
+            </LoggerFields>
+        </Syslog>
+        <RollingFile name="RollingFile" fileName="/opt/SRPF/FrontEnd/logs/srpffrontend.log" 
+            filePattern="/opt/SRPF/oldlogs/srpffrontend-%d{MM-dd-yyyy}.log.gz" ignoreExceptions="false">
+            <PatternLayout>
+		<!--
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+		-->
+                <Pattern>%m%n</Pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy />
+        </RollingFile>
+        <!-- <Console name="STDOUT">
+        	<PatternLayout>
+        		<Pattern>%m</Pattern>
+      		</PatternLayout>
+        </Console>-->
+    </Appenders>
+    
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+        <Logger name="com.telespazio.csg.srpf.logging.EventManager" level="INFO" additivity="false">
+        	<AppenderRef ref="Syslog"/>
+        </Logger>
+        <!--<Logger name="com.telespazio.csg.srpf.logging.TraceManager" level="INFO" additivity="false">
+        	<AppenderRef ref="RollingFile"/>
+        </Logger>-->
+    </Loggers>
+</Configuration>

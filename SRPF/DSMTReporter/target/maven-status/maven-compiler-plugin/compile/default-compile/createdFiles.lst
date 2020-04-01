@@ -1,0 +1,10 @@
+com\telespazio\csg\srpf\dsmt\DSMTReporterConstants$1.class
+com\telespazio\csg\srpf\dsmt\DSMTReporterConstants$ReportType.class
+com\telespazio\csg\srpf\dsmt\DSMTReporterConstants$Severity.class
+com\telespazio\csg\srpf\dsmt\DSMTReporterConstants.class
+com\telespazio\csg\srpf\dsmt\DSMTReporter$1.class
+com\telespazio\csg\srpf\dsmt\DSMTReporter$DSMTReporterHelper.class
+com\telespazio\csg\srpf\dsmt\DSMTReporterConstants$ConfidentialLevel.class
+com\telespazio\csg\srpf\dsmt\DSMTReporterConstants$ConfidentialFlag.class
+com\telespazio\csg\srpf\dsmt\DSMTReporter.class
+com\telespazio\csg\srpf\dsmt\DSMTReporterConstants$SecurityEnum.class

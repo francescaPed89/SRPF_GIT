@@ -1,0 +1,51 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>com.telespazio.csg</groupId>
+		<artifactId>SRPF</artifactId>
+		<version>2.2.8p</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.telespazio.csg.srpf</groupId>
+	<artifactId>S-RPFBackend</artifactId>
+	<packaging>war</packaging>
+	<name>SRPFBackend</name>
+	<description>war holding the ws controller</description>
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<warSourceDirectory>WebContent</warSourceDirectory>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<packagingExcludes>WEB-INF/lib/servlet-api-3.1.FR.jar</packagingExcludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>com.telespazio.csg.srpf</groupId>
+			<artifactId>feasibilityPerformer</artifactId>
+			<version>2.2.8p</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>3.1.FR</version>
+			<!-- <scope>system</scope> <systemPath>${basedir}/../NoMavenDep/servlet-api.jar</systemPath> -->
+		</dependency>
+	</dependencies>
+</project>
