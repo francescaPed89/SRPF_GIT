@@ -84,7 +84,7 @@ public class ManageAllocPlan
         // stop time
         String stopTime = opt[1];
 
-        System.out.println("Deleting passes  from " + startTime + " - " + stopTime);
+//        System.out.println("Deleting passes  from " + startTime + " - " + stopTime);
         // tranform to Julian
         double initialEpoch = DateUtils.fromISOToCSKDate(startTime);
         // tranform to Julian
@@ -120,7 +120,7 @@ public class ManageAllocPlan
         // to julina
         double finalEpoch = DateUtils.fromISOToCSKDate(stopTime);
 
-        System.out.println("Deleting passes for " + sarName + "   from " + startTime + " - " + stopTime);
+//        System.out.println("Deleting passes for " + sarName + "   from " + startTime + " - " + stopTime);
         SatellitePassBO bo = new SatellitePassBO();
         // deleting
         bo.deletePassInTheIntervalForSatellite(sarName, initialEpoch, finalEpoch);
@@ -135,7 +135,7 @@ public class ManageAllocPlan
      */
     static void importAllocationPlan(String fileName) throws NamingException, Exception
     {
-        System.out.println("Trying to import: " + fileName);
+//        System.out.println("Trying to import: " + fileName);
         // accessing db
         SatellitePassBO bo = new SatellitePassBO();
         // importing
@@ -150,7 +150,7 @@ public class ManageAllocPlan
      */
     static void importSoe(String fileName) throws Exception
     {
-        System.out.println("Trying to import SOE: " + fileName);
+//        System.out.println("Trying to import SOE: " + fileName);
         // accessing db
         SatellitePassBO bo = new SatellitePassBO();
         // importing
@@ -207,31 +207,31 @@ public class ManageAllocPlan
             {
                 // delete all from now
                 deleteAllFromNow();
-                System.out.println("Satellite passes successfully deleted");
+                //System.out.println("Satellite passes successfully deleted");
             } // end else if
             else if (line.hasOption('d'))
             {
                 // delete from intervals
                 deleteInterval(line.getOptionValues('d'));
-                System.out.println("Satellite passes successfully deleted");
+               // System.out.println("Satellite passes successfully deleted");
             } // end else if
             else if (line.hasOption('s'))
             {
                 // delete from intervals and satellite
                 deleteIntervalForSatellite(line.getOptionValues('s'));
-                System.out.println("Satellite passes successfully deleted");
+//                System.out.println("Satellite passes successfully deleted");
             } // end else if
             else if (line.hasOption('i'))
             {
                 // import allocation plan
                 importAllocationPlan(line.getOptionValue('i'));
-                System.out.println("File successfully imported");
+//                System.out.println("File successfully imported");
             } // end else if
             else if (line.hasOption('e'))
             {
                 // import soe
                 importSoe(line.getOptionValue('e'));
-                System.out.println("File successfully imported");
+//                System.out.println("File successfully imported");
             } // end else if
 
         }

@@ -35,6 +35,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -330,6 +331,133 @@ public class ConfigurationBO
     }// end method
 
     /**
+     * Fill table with configuration file
+     * 
+     * @author Abed Alissa
+     * @version 1.0
+     * @since
+     * @param path
+     *            of configuration file
+     * @throws NamingException
+     * @throws Exception
+     */
+    public void updateBeamTable(String path) throws NamingException, Exception
+
+    {
+        // fill the tables starting from a configuration file
+        // create dao
+        ConfigurationDao dao = new ConfigurationDao();
+
+        this.tm.debug("uploading csv data " + path);
+        // retrieve file
+        File csvFile = new File(path);
+        try
+        {
+            // check if file is well formed
+            dao.dataControlCsv(csvFile);
+
+            // delete tables
+            dao.deleteTablesConfiguration();
+
+            this.tm.debug("Trying to  import csv data to DataManager DataBase table: " + "MISSION");
+            // fill mission
+            dao.importConfigurationMissionCsv(csvFile);
+            this.tm.debug("Success import csv data to DataManager DataBase table: " + "MISSION");
+
+            this.tm.debug("Trying to  import csv data to DataManager DataBase table: " + "SENSOR_MODE");
+            // fill sensor modes
+            dao.importConfigurationSensoreModeCsv(csvFile);
+            this.tm.debug("Success import csv to DataManager DataBase table: " + "SENSOR_MODE");
+
+            this.tm.debug("Trying to  import csv data to DataManager DataBase table: " + "SATELLITE");
+            // fill satellite
+            dao.importConfigurationSatelliteCsv(csvFile);
+            this.tm.debug("Success import csv to  DataManager DataBase table: " + "SATELLITE");
+
+            this.tm.debug("Trying to  import csv data to DataManager DataBase table: " + "BEAM");
+            // fill beams
+            dao.importConfigurationBeamCsv(csvFile);
+            this.tm.debug("Success import csv to DataManager DataBase table: " + "BEAM");
+
+            this.tm.debug("Trying to  import csv data to DataManager DataBase table: " + "SAT_BEAM_ASSOCIATION");
+            // create beam satellite association
+            dao.importConfigurationSatelliteBeamAssCsv(csvFile);
+            this.tm.debug("Success import csv to DataBase table: " + "SAT_BEAM_ASSOCIATION");
+
+        } // end try
+
+        catch (SQLException ex)
+        {
+            // ManagerLogger.logError(this, "Connection error: " + ex);
+            // log error
+            this.tm.critical(EventType.SOFTWARE_EVENT, "Connection error: ", ex.getMessage());
+            // rollback
+            dao.rollback();
+            // rethrow exception
+            throw ex;
+        } // end catch
+        finally
+        {
+            // close transaction
+            dao.closeTransaction();
+            // close connection
+            dao.closeConnection();
+        } // end finaally
+
+    }// end method
+    /**
+     * Update SENSOR_MODE BEAM and SAT_BEAM:ASSOCIATON only by using the
+     * Configuration file
+     * 
+     * @param path
+     * @throws NamingException
+     * @throws Exception
+     */
+    public void updateSensorModesConfiguration2(String path) throws NamingException, Exception
+
+    {
+        // fill the tables starting from a configuration file
+        // create dao
+        ConfigurationDao dao = new ConfigurationDao();
+
+        this.tm.debug("uploading csv data " + path);
+        File csvFile = new File(path);
+        try
+        {
+            // check file
+            dao.dataControlCsv(csvFile);
+
+            this.tm.debug("Trying to  import csv data to DataManager DataBase table: " + "BEAM");
+            // import beams
+            
+            List<BeamBean> allBeams = dao.getBeamsSatellite();
+            System.out.println(" all beams as list : "+allBeams);
+            dao.updateBeamCsv(allBeams,csvFile);
+            this.tm.debug("Success import csv to DataManager DataBase table: " + "BEAM");
+
+        } // end try
+
+        catch (SQLException ex)
+        {
+            // ManagerLogger.logError(this, "Connection error: " + ex);
+            this.tm.critical(EventType.SOFTWARE_EVENT, "Connection error: ", ex.getMessage());
+            // rollback
+            dao.rollback();
+            // rethrow exception
+            throw ex;
+        } // end catch
+        finally
+        {
+            // close transaction
+            dao.closeTransaction();
+            // close connection
+            dao.closeConnection();
+        } // end finally
+
+    }// end method
+
+    
+    /**
      * Update SENSOR_MODE BEAM and SAT_BEAM:ASSOCIATON only by using the
      * Configuration file
      * 
@@ -391,6 +519,54 @@ public class ConfigurationBO
 
     }// end method
 
+    
+    /**
+     * Update SENSOR_MODE BEAM and SAT_BEAM:ASSOCIATON only by using the
+     * Configuration file
+     * 
+     * @param path
+     * @throws NamingException
+     * @throws Exception
+     */
+    public void alterTableBeam(String path) throws NamingException, Exception
+
+    {
+        // fill the tables starting from a configuration file
+        // create dao
+        ConfigurationDao dao = new ConfigurationDao();
+
+        this.tm.debug("alterTableBeam data " + path);
+        File csvFile = new File(path);
+        try
+        {
+            // check file
+            dao.dataControlCsv(csvFile);
+
+            dao.alterTableBeam(csvFile);
+            this.tm.debug("Success update DataManager DataBase table: " + "BEAM");
+
+        } // end try
+
+        catch (SQLException ex)
+        {
+            // ManagerLogger.logError(this, "Connection error: " + ex);
+            this.tm.critical(EventType.SOFTWARE_EVENT, "Connection error: ", ex.getMessage());
+            // rollback
+            dao.rollback();
+            // rethrow exception
+            throw ex;
+        } // end catch
+        finally
+        {
+            // close transaction
+            dao.closeTransaction();
+            // close connection
+            dao.closeConnection();
+        } // end finally
+
+    }// end method
+
+    
     /**
      * @author Abed Alissa
      * @version 1.0
@@ -504,3 +680,5 @@ public class ConfigurationBO
     } // end method
 
 }// end class
+
+

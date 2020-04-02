@@ -264,14 +264,14 @@ public class SatellitePassBO
         // Take into account name space
         dbFactory.setNamespaceAware(true);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        System.out.println("file of soe data :"+fileName);
+        //  System.out.println("file of soe data :"+fileName);
         // parsing xml file
         Document doc = dBuilder.parse(fileName);
-        System.out.println("Loaded document " + fileName);
+        //  System.out.println("Loaded document " + fileName);
         // loading schema
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         
-        System.out.println("VALIDATED VERSUS soeXSD SCHEMA " + this.soeXSD);
+        // System.out.println("VALIDATED VERSUS soeXSD SCHEMA " + this.soeXSD);
 
         Schema schema = factory.newSchema(new File(this.soeXSD));
         // validating xml
@@ -280,7 +280,7 @@ public class SatellitePassBO
         // retireving pass bean from XML
         satPassList = getPassListFromSoe(doc);
         
-        System.out.println("satPassList " + satPassList);
+        // System.out.println("satPassList " + satPassList);
 
         
         /*
@@ -294,7 +294,7 @@ public class SatellitePassBO
          * //System.out.println(DateUtils.fromCSKDateToISOFMTDateTime(b.
          * getVisibilityStop())); }
          */
-        System.out.println("document " + fileName + " is valid");
+        //  System.out.println("document " + fileName + " is valid");
         // DAO
         SatellitePassDAO dao = null;
         try
@@ -339,10 +339,10 @@ public class SatellitePassBO
         // Soe Element List
         NodeList satelliteEventNodeList = doc.getElementsByTagNameNS(DataManagerConstants.SatelliteEventNS, DataManagerConstants.SatelliteEventTagName);
         
-        System.out.println("satelliteEventNodeList"+satelliteEventNodeList);
+//        System.out.println("satelliteEventNodeList"+satelliteEventNodeList);
         // list lenght
         int numberofSatelliteEvent = satelliteEventNodeList.getLength();
-        System.out.println("numberofSatelliteEvent"+numberofSatelliteEvent);
+//        System.out.println("numberofSatelliteEvent"+numberofSatelliteEvent);
 
         // temporary elements
         Element currentSatelliteEvent;
@@ -359,14 +359,14 @@ public class SatellitePassBO
         for (int i = 0; i < numberofSatelliteEvent; i++)
         {
             currentSatelliteEvent = (Element) satelliteEventNodeList.item(i);
-            System.out.println("currentSatelliteEvent"+currentSatelliteEvent);
+//            System.out.println("currentSatelliteEvent"+currentSatelliteEvent);
             currentExtAngle = 0;
 //X_PASS   
             currentEventTypeValue = XMLUtils.getChildElementText(currentSatelliteEvent, DataManagerConstants.EventTypeSOETagName, DataManagerConstants.EventTypeSOENS);
             currentExtAngleAsString = null;
             currentExtAngleAsString = XMLUtils.getChildElementText(currentSatelliteEvent, DataManagerConstants.SOEExtAngleTagName, DataManagerConstants.SOEExtAngleTagNameNS);
-            System.out.println("currentExtAngleAsString"+currentExtAngleAsString);
-            System.out.println("currentEventTypeValue"+currentEventTypeValue);
+//            System.out.println("currentExtAngleAsString"+currentExtAngleAsString);
+//            System.out.println("currentEventTypeValue"+currentEventTypeValue);
 
 //            try
 //            {
@@ -382,18 +382,18 @@ public class SatellitePassBO
 //                continue;
 //            } // end catcth
             
-            System.out.println("currentExtAngle"+currentExtAngle);
+//            System.out.println("currentExtAngle"+currentExtAngle);
 
             if (currentEventTypeValue.equals(DataManagerConstants.EventType_X_PASS_VALUE) && (currentExtAngle == 0))
             {
                 // counter++;
                 try
                 {
-                    System.out.println("try to add currentSatellitePass");
+                	 //   System.out.println("try to add currentSatellitePass");
 
                     currentSatellitePass = getSatellitePassFromSatelliteSoe(currentSatelliteEvent);
                     satPassList.add(currentSatellitePass);
-                    System.out.println("currentSatelliteEvent AFTER ADD "+currentSatelliteEvent);
+                    // System.out.println("currentSatelliteEvent AFTER ADD "+currentSatelliteEvent);
 
                 } // end try
                 catch (Exception e)
@@ -404,7 +404,7 @@ public class SatellitePassBO
             } // end if
             else
             {
-                System.out.println("nothing to add");
+            	 //  System.out.println("nothing to add");
 
             }
         } // end for
@@ -429,11 +429,11 @@ public class SatellitePassBO
 
         String satelliteName = XMLUtils.getChildElementText(satelliteEvent, DataManagerConstants.SatelliteTagName, DataManagerConstants.SatelliteTagNameNS);
         satellitePass.setSatelliteName(satelliteName);
-        System.out.println("satelliteName "+satelliteName);
+        //System.out.println("satelliteName "+satelliteName);
         // extract station name
         String stationId = XMLUtils.getChildElementText(satelliteEvent, DataManagerConstants.StationIDTagName, DataManagerConstants.StationIDTagNameNS);
         
-        System.out.println("stationId "+stationId);
+        //    System.out.println("stationId "+stationId);
 
         // getChildElementText(satelliteEvent,
         // DataManagerConstants.StationNameTagName);
@@ -447,11 +447,11 @@ public class SatellitePassBO
          * + ":"+stationId+":"); }//end if
          */
         satellitePass.setAsId(asId);
-        System.out.println("asId "+asId);
+        // System.out.println("asId "+asId);
 
         // extract contact counter
         String contactCounterString = XMLUtils.getChildElementText(satelliteEvent, DataManagerConstants.SOEEventCounterTagName, DataManagerConstants.SOEEventCounterTagNameNS);
-        System.out.println("contactCounterString "+contactCounterString);
+        // System.out.println("contactCounterString "+contactCounterString);
 
         // getChildElementText(satelliteEvent,
         // DataManagerConstants.EventCounterTagName);
@@ -459,7 +459,7 @@ public class SatellitePassBO
 
         // filling info
         fillSatellitePassTimingInfo(satellitePass, satelliteEvent);
-        System.out.println("satellitePass "+satellitePass);
+        //System.out.println("satellitePass "+satellitePass);
 
         // return
         return satellitePass;
@@ -482,23 +482,23 @@ public class SatellitePassBO
 
         // retriving time
         timeStartString = XMLUtils.getChildElementText(satelliteSoe, DataManagerConstants.SOEEventStartTagName, DataManagerConstants.SOEEventStartTagNameNS);
-        System.out.println("timeStartString "+timeStartString);
+        //System.out.println("timeStartString "+timeStartString);
 
         // retrieving time
         timeStopString = XMLUtils.getChildElementText(satelliteSoe, DataManagerConstants.SOEEventStopTagName, DataManagerConstants.SOEEventStopTagNameNS);
-        System.out.println("timeStopString "+timeStopString);
+        // System.out.println("timeStopString "+timeStopString);
 
         // conversion
         double appo = DateUtils.fromEpochToCSKDateForSOe(timeStartString);
         
-        System.out.println("appo timeStartString"+appo);
+        //System.out.println("appo timeStartString"+appo);
 
         // setting
         satPass.setVisibiliyStart(appo);
         // conversion
         appo = DateUtils.fromEpochToCSKDateForSOe(timeStopString);
         
-        System.out.println("appo timeStopString "+appo);
+        // System.out.println("appo timeStopString "+appo);
 
         // setting
         satPass.setVisibilityStop(appo);

@@ -57,15 +57,15 @@ public class ConfigurationDaoTest {
             while ((line = br.readLine()) != null)
             {
             	
-            	System.out.println(line);
+//            	System.out.println(line);
                 if (!line.startsWith(StartComment))
                 {
                     // use comma as separator
                     // list tokens
                     sensorModeNames = line.split("\\" + cvsSplitBy);
-                	System.out.println("sensorModeNames: "+sensorModeNames);
+                    //	System.out.println("sensorModeNames: "+sensorModeNames);
 
-                	System.out.println("lenght: "+sensorModeNames.length);
+                	 //	System.out.println("lenght: "+sensorModeNames.length);
 
                     if (sensorModeNames.length > 10)
                     {

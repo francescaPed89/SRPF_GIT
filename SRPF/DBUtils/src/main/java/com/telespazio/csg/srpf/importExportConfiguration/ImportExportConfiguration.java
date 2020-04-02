@@ -77,7 +77,13 @@ public class ImportExportConfiguration
             else if (typeConfiguration.equalsIgnoreCase(DataManagerConstants.CONFIGURATION_UPDATE))
             {
                 // update
-                configurationBO.updateSensorModesConfiguration(filePath);
+            	/*
+            	 * //MODIFICA FRA 2.2.9p: prima era 
+            	 *                 configurationBO.updateSensorModesConfiguration(filePath);
+					ora è updateSensorModesConfiguration2
+            	 */
+                configurationBO.updateSensorModesConfiguration2(filePath);
+
                 logger.debug("Success update csv file from DataManager tables");
 
             } // end else if

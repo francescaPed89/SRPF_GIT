@@ -652,13 +652,13 @@ public class SatellitePassDAO extends GenericDAO
      */
     public void importSatellitePassFromSOE(List<SatellitePassBean> satellitePassList) throws SQLException
     {  
-        System.out.println("Inside importSatellitePassFromSOE");
+    	 // System.out.println("Inside importSatellitePassFromSOE");
 
         PreparedStatement updateStatement = null;
         Map<String, Integer> satelliteMap = getSatelliteMapID();
         String update = "UPDATE SATELLITE_PASS SET VISIBILITY_START_TIME=?" + " ,VISIBILITY_STOP_TIME=?" + " WHERE CONTACT_COUNTER=?" + " and SATELLITE=?" + " and ASID=?";
 
-        String update1 = "UPDATE SATELLITE_PASS SET VISIBILITY_START_TIME=?" + " ,VISIBILITY_STOP_TIME=?" + " WHERE CONTACT_COUNTER=?";
+        // String update1 = "UPDATE SATELLITE_PASS SET VISIBILITY_START_TIME=?" + " ,VISIBILITY_STOP_TIME=?" + " WHERE CONTACT_COUNTER=?";
 
         try
 
@@ -702,7 +702,7 @@ public class SatellitePassDAO extends GenericDAO
                 updateStatement.setDouble(1, satPass.getVisibiliyStart());
                 updateStatement.setDouble(2, satPass.getVisibilityStop());
                 updateStatement.setLong(3, satPass.getCntactCounter());
-                System.out.println(updateStatement);
+                // System.out.println(updateStatement);
 
                 updateStatement.setInt(4, satelliteId);
                 updateStatement.setString(5, satPass.getAsId());
@@ -710,14 +710,14 @@ public class SatellitePassDAO extends GenericDAO
                 updateStatement.executeUpdate();
                 // closeStatement(updateStatement);
             } // end for
-            System.out.println("Inserted " + satellitePassList.size() + " entries");
+            // System.out.println("Inserted " + satellitePassList.size() + " entries");
 
         } // end try
 
         catch (NoSuchElementException e)
 
         {
-            System.out.println("NoSuchElementException");
+        	 // System.out.println("NoSuchElementException");
 
             this.con.rollback();
 

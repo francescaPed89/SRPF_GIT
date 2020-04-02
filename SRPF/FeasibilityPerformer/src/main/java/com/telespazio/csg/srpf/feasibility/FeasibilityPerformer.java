@@ -2617,16 +2617,12 @@ public class FeasibilityPerformer
 				SPARCManager sparc = new SPARCManager(sparcMode, request, optimalAcqList, this.prListWorkingDir,
 						this.dem, algo.isSingleAcquired(), this.gridder.isAcrossDateLine(),
 						this.di2SAvailabilityConfirmationFlag);
-				// sparc.getAcqList();
-				// IN caso si deve fare un altro giro salvare prima
-				// optimalAcqlist e riusarla richiamando sparc
-				// in quanto lo sparc prima di resrituirla la clona
+				
 				optimalAcqList = sparc.getAcqList();
 
 				if (request.isPassThrough()) {
 					optimalAcqList = checkForPassThrough(optimalAcqList);
 				} // end if
-				
 
 				logger.debug("INVOKING SPARC! optimalAcqList after SIZE" + optimalAcqList.size());
 				logger.debug("INVOKING SPARC! optimalAcqList after " + optimalAcqList);
