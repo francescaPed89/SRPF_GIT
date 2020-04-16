@@ -919,7 +919,7 @@ public class PRRequestParameter implements Cloneable
 	  
 	public static String getSRPFVersion() throws IOException, XmlPullParserException {
 		
-		return "2.2.8p";
+		return "2.2.9p";
 //		findLocalPath();
 //		String version = null;
 //		MavenXpp3Reader reader = new MavenXpp3Reader();

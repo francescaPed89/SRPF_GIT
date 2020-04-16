@@ -3,13 +3,13 @@
 <parent>
     <groupId>com.telespazio.csg</groupId>
     <artifactId>SRPF</artifactId>
-    <version>2.2.8p</version>
+    <version>2.2.9p</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.telespazio.csg.srpf</groupId>
   <artifactId>cmSimSend</artifactId>
   <packaging>jar</packaging>
-  <version>2.2.8p</version>
+  <version>2.2.9p</version>
   <name>cmSimSend</name>
   <url>http://maven.apache.org</url>
   <build>

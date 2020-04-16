@@ -110,7 +110,7 @@ public class ConfigurationDaoTest {
                             int dtoMaxDuration = Integer.parseInt(sensorModeNames[16].trim());
                             int resTime = Integer.parseInt(sensorModeNames[17].trim());
                             int dtoDurationSquared = 0;
-                                                     System.out.println("--------------------------------------------------------------");
+//                                                     System.out.println("--------------------------------------------------------------");
 
                             if(sensorModeNames.length > 18)
                             {                            System.out.println("dtoDurationSquared > 18");
@@ -118,13 +118,13 @@ public class ConfigurationDaoTest {
                             	try
                             	{
                                     dtoDurationSquared = Integer.parseInt(sensorModeNames[18].trim());
-                            		System.out.println("dtoDurationSquaredOK++++++++++++++++"+dtoDurationSquared);
+//                            		System.out.println("dtoDurationSquaredOK++++++++++++++++"+dtoDurationSquared);
 
                             	}
                             	catch(Exception e)
                             	{
                             		dtoDurationSquared = 0;
-                            		System.out.println("dtoDurationSquaredERROR*********"+dtoDurationSquared);
+//                            		System.out.println("dtoDurationSquaredERROR*********"+dtoDurationSquared);
 
                             		continue;
                             	}
@@ -196,4 +196,21 @@ System.out.println(allBeams.size());
             }
         } // end finally
     }// end method	}
+
+	@Test
+	public void testCheckIfIsDifferent() throws Exception {
+		
+		String existBeam = "BeamBean [satName=null, beamName=S2C-021, nearOffNadir=37.15, farOffNadir=38.05, sensorMode=9, sensorModeName=null, isEnabled=1, nearOffNadirBeam=0.0, farOffNadirBeam=0.0, swDim1=5.0, swDim2=10.0, isSpotLight=false, idBeam=251, dtoMinDuration=5470, dtoMaxDuration=17000, resTime=3000, dtoDurationSquared=0]";
+		
+		String dummyBeam = "BeamBean [satName=null, beamName=S2C-021, nearOffNadir=37.15, farOffNadir=38.05, sensorMode=9, sensorModeName=null, isEnabled=1, nearOffNadirBeam=0.0, farOffNadirBeam=0.0, swDim1=5.0, swDim2=10.0, isSpotLight=false, idBeam=251, dtoMinDuration=5470, dtoMaxDuration=17000, resTime=3000, dtoDurationSquared=0]";
+		boolean isDifferent = ConfigurationDao.checkIfIsDifferent(existBeam, dummyBeam);
+		System.out.println(isDifferent);
+		
+		
+		existBeam = "BeamBean [satName=null, beamName=S2C-021, nearOffNadir=37.15, farOffNadir=38.05, sensorMode=9, sensorModeName=null, isEnabled=1, nearOffNadirBeam=0.0, farOffNadirBeam=0.0, swDim1=5.0, swDim2=10.0, isSpotLight=false, idBeam=251, dtoMinDuration=5470, dtoMaxDuration=17000, resTime=3000, dtoDurationSquared=0]";
+		
+		dummyBeam = "BeamBean [satName=null, beamName=S2C-022, nearOffNadir=37.15, farOffNadir=38.05, sensorMode=9, sensorModeName=null, isEnabled=1, nearOffNadirBeam=0.0, farOffNadirBeam=0.0, swDim1=5.0, swDim2=10.0, isSpotLight=false, idBeam=251, dtoMinDuration=5470, dtoMaxDuration=17000, resTime=3000, dtoDurationSquared=0]";
+		isDifferent = ConfigurationDao.checkIfIsDifferent(existBeam, dummyBeam);
+		System.out.println(isDifferent);
+	}
 }

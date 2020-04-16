@@ -138,10 +138,6 @@ public class SatelliteEphemerids
 
             String path = "";
             
-            for(int i=0;i<fileNames.size();i++)
-            {
-                logger.debug("ORBDATA : LOADING : "+fileNames.get(i));
-            }
 //
 //            logger.debug("ORBDATA ODSTP fileName : "+this.odstp.getObdataFileName());
 //            logger.debug("ORBDATA ODMTP fileName : "+this.odmtp.getObdataFileName());

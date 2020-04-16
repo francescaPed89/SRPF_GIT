@@ -99,6 +99,10 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		try {
 			int satId = getIdSatellite(satName);
 			// delete string
+			if(con==null || con.isClosed())
+		{
+			con = super.initConnection();
+		}
 			String deleteString = "delete from GSIF_PAW where ACTIVITY_ID=" + activityId + " and SATELLITE=" + satId;
 			this.con.setAutoCommit(false);
 			deleteStatement = this.con.createStatement();
@@ -118,6 +122,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		finally {
 			// close statement
 			closeStatement(deleteStatement);
+			con.close();
 		} // end finally
 
 	}// end method
@@ -161,7 +166,10 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 			deleteString = deleteString + " AND SATELLITE in "
 					+ "(SELECT SATELLITE.ID_SATELLITE from SATELLITE join MISSION on SATELLITE.MISSION=MISSION.ID_MISSION AND MISSION.MISSION_NAME='"
 					+ mission + "')";
-
+			if(con==null || con.isClosed())
+		{
+			con = super.initConnection();
+		}
 			// no autocommit
 			this.con.setAutoCommit(false);
 			// executing
@@ -181,6 +189,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		finally {
 			// close stm
 			closeStatement(deleteStatement);
+			con.close();
 		} // end finally
 
 	}// end method
@@ -203,7 +212,10 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 
 	{
 		//System.out.println("show connection status "+this.con.toString());
-
+		if(con==null || con.isClosed())
+	{
+		con = super.initConnection();
+	}
 		// autocommit false
 		this.con.setAutoCommit(false);
 		//System.out.println("inside PlatformActivityWindowDAO.uploadPaw");
@@ -260,6 +272,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		finally {
 			// close stm
 			closeStatement(insertStatement);
+			con.close();
 		} // end finally
 
 		//System.out.println("Data inserted");
@@ -280,6 +293,10 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		int idSatellite = 0;
 		// query string
 		String query = "SELECT ID_SATELLITE  from SATELLITE where   SATELLITE_NAME = " + "'" + satelliteName + "'";
+		if(con==null || con.isClosed())
+	{
+		con = super.initConnection();
+	}
 		PreparedStatement st = this.con.prepareStatement(query);
 		ResultSet rs = null;
 		try {
@@ -314,7 +331,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 			}
 
 			st.close();
-
+			con.close();
 		} // end finally
 
 		return idSatellite;
@@ -353,7 +370,10 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		PlatformActivityWindowDAO.logger.debug(" and final epoch :  " + finalEpoch);
 		PlatformActivityWindowDAO.logger.debug(" with initial epoch DATE:  " + DateUtils.fromCSKDateToDateTime(initialEpoch));
 		PlatformActivityWindowDAO.logger.debug(" and final epoch DATE:  " + DateUtils.fromCSKDateToDateTime(finalEpoch));
-
+		if(con==null || con.isClosed())
+	{
+		con = super.initConnection();
+	}
 		this.con.setAutoCommit(false);
 
 		PreparedStatement st = this.con.prepareStatement(query);
@@ -432,6 +452,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 
 			// close stm
 			st.close();
+			con.close();
 			// con.close();
 		} // end finally
 		return pawList;
@@ -472,7 +493,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		PlatformActivityWindowDAO.logger.debug(" and final epoch :  " + DateUtils.fromCSKDateToDateTime(stop));
 
 		
-		PreparedStatement st = this.con.prepareStatement(query);
+		PreparedStatement st = null;
 		ResultSet rs = null;
 
 		String currentSatelliteName = "";
@@ -482,6 +503,11 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		ArrayList<PlatformActivityWindowBean> currentSatellitePawList = new ArrayList<>();
 
 		try {
+			if(con==null || con.isClosed())
+			{
+				con = super.initConnection();
+			}
+			st = this.con.prepareStatement(query);
 			// exeuting query
 			rs = st.executeQuery();
 
@@ -565,10 +591,15 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 				currentSatellitePawList.add(pawData);
 			}
 		} // end try
-		catch (SQLException e) {
+		catch (Exception e) {
 			this.tm.critical(EventType.SOFTWARE_EVENT, "Errore in SELECT from GSIF PAW: ", e.getMessage());
 			// rethrow
-			throw e;
+			try {
+				throw e;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
 		} // end catch
 		finally {
@@ -578,7 +609,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 				rs.close();
 			}
 			st.close();
-			// con.close();
+			con.close();
 		} // end finally
 			// return map
 		return pawMap;
@@ -592,7 +623,10 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 	 * @throws Exception 
 	 */
 	public void deletePawData(double finalEpoch) throws Exception {
-		Connection con = initConnection();
+		if(con==null || con.isClosed())
+	{
+		con = super.initConnection();
+	}
 		StringBuffer sql = new StringBuffer();
 		sql.append("DELETE FROM GSIF_PAW");
 		sql.append(" WHERE");

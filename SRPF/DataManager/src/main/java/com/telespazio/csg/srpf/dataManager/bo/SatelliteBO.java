@@ -61,9 +61,6 @@ public class SatelliteBO
 {
      private EventManager eventMgr = new EventManager(); // Handles event logging
 
-    static final Logger logger = LogManager.getLogger(SatelliteBO.class.getName());
-
-
     /**
      * @author Abed Alissa
      * @version 1.0
@@ -78,7 +75,6 @@ public class SatelliteBO
         SatelliteDao dao = null;
         // Mission id
         int idMission = 0;
-        SatelliteBO.logger.debug("Inside method getIdMission ");
         try
         {
             dao = new SatelliteDao();
@@ -100,7 +96,7 @@ public class SatelliteBO
         return idMission;
     }// end method
 
-    /**
+	/**
      * @author Abed Alissa
      * @version 1.0
      * @since 2016-1-20
@@ -115,7 +111,6 @@ public class SatelliteBO
         SatelliteDao dao = null;
         // list to be returned
         ArrayList<BeamBean> beamsSatelliteList = new ArrayList<>();
-        SatelliteBO.logger.trace("Inside method getBeamsSatellite ArrayList<BeamBean> of SatelliteBO ");
         try
         {
 
@@ -157,7 +152,6 @@ public class SatelliteBO
         SatelliteDao dao = null;
         // list of beam to be returned
         ArrayList beamsSatelliteListCon = new ArrayList();
-        SatelliteBO.logger.debug("Inside method getBeamsExportConfiguration ");
         try
         {
             dao = new SatelliteDao();
@@ -168,7 +162,6 @@ public class SatelliteBO
         catch (Exception e)
         {
             // log
-            SatelliteBO.logger.error(EventType.SOFTWARE_EVENT, "---", e.getMessage());
             // rethrow
             throw e;
         } // end catch
@@ -203,7 +196,6 @@ public class SatelliteBO
         ArrayList beamsSatelliteList = null;
         ArrayList beamsSatelliteListAll = new ArrayList(); // sat list
         int idSatellite = 0;
-        SatelliteBO.logger.debug("Inside method getBeamsSensorMode ");
         try
         {
             dao = new SatelliteDao(); // init dao
@@ -247,7 +239,6 @@ public class SatelliteBO
     {
         SatelliteDao dao = null;
         SatelliteBean satelliteDati = new SatelliteBean(); // sat bean
-        SatelliteBO.logger.debug("Inside method getDatiSatellite ");
         try
         {
             dao = new SatelliteDao();
@@ -282,7 +273,6 @@ public class SatelliteBO
 
         SatelliteDao dao = null;
         int idSensorMode = 0;
-        SatelliteBO.logger.debug("Inside method getIdSensorMode ");
 
         try
         {
@@ -319,7 +309,6 @@ public class SatelliteBO
         SatelliteDao dao = null;
         // list to be returbed
         ArrayList<SatelliteBean> satelliteForSensorModeList = new ArrayList<>();
-        SatelliteBO.logger.debug("Inside method getSatellitesPerSensorMode ");
         try
         {
             dao = new SatelliteDao();
@@ -359,7 +348,6 @@ public class SatelliteBO
         Map<SatelliteBean, List<BeamBean>> beamMap = new TreeMap<>();
         SatelliteDao dao = null;
 
-        SatelliteBO.logger.trace("Inside method getBeamsSatellite Map<SatelliteBean, List<BeamBean>> os SatelliteBO missionNameOrFirstSensorMode");
         try
         {
             dao = new SatelliteDao();
@@ -370,7 +358,6 @@ public class SatelliteBO
         } // end try
         catch (Exception e)
         {
-        	DateUtils.getLogInfo(e, SatelliteBO.logger);
             // rethor
             throw e;
         } // end catch
@@ -437,10 +424,8 @@ public class SatelliteBO
         try
         {
             dao = new SatelliteDao();
-            SatelliteBO.logger.debug("Start: Get List Satellites Per SensorMode");
             // fill list
             satelliteForSensorModeList = dao.getSatellitesPerSensorModeConfiguration(idSensorMode, idMission);
-            SatelliteBO.logger.debug("End: Get List Satellites PerSensor Mode");
         } // end try
         catch (Exception e)
         {
@@ -472,7 +457,6 @@ public class SatelliteBO
         SatelliteDao dao = null;
         // list to be returned
         ArrayList listaIdSensorsMode = new ArrayList();
-        SatelliteBO.logger.debug("Start: Get Id Satellites PerSensor Mode");
         try
         {
             dao = new SatelliteDao();
@@ -506,7 +490,6 @@ public class SatelliteBO
     {
         SatelliteDao dao = null;
         ArrayList listSensorsModeName = new ArrayList();
-        SatelliteBO.logger.debug("Start: Get List Sensors Mode");
 
         try
         {
@@ -528,7 +511,6 @@ public class SatelliteBO
                 dao.closeConnection();
             }
         } // end finally
-        SatelliteBO.logger.debug("End: Get List Sensors Mode");
         return listSensorsModeName;
     } // end method
 
@@ -1061,7 +1043,6 @@ public class SatelliteBO
         
         if(allowedSide<0 || allowedSide>3)
         {
-            SatelliteBO.logger.error("Only 0 1 2 3 are allowed values for look side");
             throw new Exception("Only 0 1 2 3 are allowed values for look side");
         }
         try

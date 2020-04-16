@@ -104,6 +104,9 @@ public class ConfigurationDao extends GenericDAO {
 	 * @throws Exception
 	 */
 	public SatelliteBean getDatiSatellite(int idSatellite) throws Exception {
+		if (con == null || con.isClosed()) {
+			con = super.initConnection();
+		}
 		// Bean to be returned
 		SatelliteBean p = null;
 		// Query string
@@ -115,7 +118,7 @@ public class ConfigurationDao extends GenericDAO {
 		try {
 			// execute query
 			this.tm.debug(query);
-			st = this.con.prepareStatement(query);
+			st = con.prepareStatement(query);
 
 			rs = st.executeQuery();
 			// retieve values on records
@@ -143,7 +146,7 @@ public class ConfigurationDao extends GenericDAO {
 			}
 			// close statement
 			st.close();
-
+			con.close();
 		} // end finally
 		return p;
 	}// end method
@@ -157,10 +160,11 @@ public class ConfigurationDao extends GenericDAO {
 	 * @throws Exception
 	 */
 	public List<BeamBean> getBeamsSatellite() throws Exception {
+
 		List<BeamBean> beams = new ArrayList<BeamBean>();
 		// Bean to be returned
 		// Query string
-		String query = "SELECT *  from BEAM ";
+		String query = "SELECT * from BEAM ";
 		// String query = "SELECT * from BEAM where ID_BEAM = (SELECT * FROM
 		// SAT_BEAM_ASSOCIATION where SATELLITE =" + "'" + idSatellite + "'";
 
@@ -170,26 +174,29 @@ public class ConfigurationDao extends GenericDAO {
 		try {
 			// execute query
 			this.tm.debug(query);
-			st = this.con.prepareStatement(query);
+			if (con == null || con.isClosed()) {
+				System.out.println("connection was closed!");
+				con = super.initConnection();
+			}
+			st = con.prepareStatement(query);
 
 			rs = st.executeQuery();
+
 			// retieve values on records
 			while (rs.next()) {
 				BeamBean beam = new BeamBean();
-
-				beam.setIdBeam(rs.getInt(0));
-				beam.setBeamName(rs.getString(1));
-				beam.setNearOffNadir(rs.getDouble(2));
-				beam.setFarOffNadir(rs.getDouble(3));
-				beam.setSensorMode(rs.getInt(4));
-				beam.setIsEnabled(rs.getInt(5));
-				beam.setSwDim1(rs.getDouble(6));
-				beam.setSwDim2(rs.getDouble(7));
-				beam.setDtoMinDuration(rs.getInt(8));
-				beam.setDtoMaxDuration(rs.getInt(9));
-				beam.setResTime(rs.getInt(10));
-				beam.setDtoDurationSquared(rs.getInt(11));
-				System.out.println("adding beam to list : " + beam);
+				beam.setIdBeam(rs.getInt(1));
+				beam.setBeamName(rs.getString(2));
+				beam.setNearOffNadir(rs.getDouble(3));
+				beam.setFarOffNadir(rs.getDouble(4));
+				beam.setSensorMode(rs.getInt(5));
+				beam.setIsEnabled(rs.getInt(6));
+				beam.setSwDim1(rs.getDouble(7));
+				beam.setSwDim2(rs.getDouble(8));
+				beam.setDtoMinDuration(rs.getInt(9));
+				beam.setDtoMaxDuration(rs.getInt(10));
+				beam.setResTime(rs.getInt(11));
+				beam.setDtoDurationSquared(rs.getInt(12));
 				beams.add(beam);
 			} // end while
 
@@ -207,7 +214,7 @@ public class ConfigurationDao extends GenericDAO {
 			}
 			// close statement
 			st.close();
-
+			con.close();
 		} // end finally
 		return beams;
 	}// end method
@@ -225,9 +232,11 @@ public class ConfigurationDao extends GenericDAO {
 	public ArrayList<Integer> getIdSatellites(int idMission) throws Exception {
 		// query string
 		String query = "SELECT ID_SATELLITE FROM SATELLITE where MISSION = " + "'" + idMission + "'";
-
+		if (con == null || con.isClosed()) {
+			con = super.initConnection();
+		}
 		this.tm.debug(query);
-		PreparedStatement st = this.con.prepareStatement(query);
+		PreparedStatement st = con.prepareStatement(query);
 		ResultSet rs = null;
 		ArrayList<Integer> listaIdSatellites = new ArrayList<Integer>();
 		int idSatellite = 0;
@@ -255,7 +264,7 @@ public class ConfigurationDao extends GenericDAO {
 			}
 			// close statement
 			st.close();
-
+			con.close();
 		} // end finally
 			// returning list
 		return listaIdSatellites;
@@ -269,16 +278,21 @@ public class ConfigurationDao extends GenericDAO {
 	 * @date
 	 * @param tableName
 	 * @return String buffer holding configuration
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-	public StringBuffer exportConfiguration(String tableName) throws SQLException {
+	public StringBuffer exportConfiguration(String tableName) throws Exception {
+
 		StringBuilder commandColl = new StringBuilder();
 		StringBuilder command = null;
 		StringBuffer sbOutputAll = new StringBuffer();
+		PreparedStatement stmt = null;
+		ResultSet rset = null;
 		try {
-			PreparedStatement stmt = this.con.prepareStatement("SELECT * FROM " + tableName);
-
-			ResultSet rset = stmt.executeQuery();
+			stmt = con.prepareStatement("SELECT * FROM " + tableName);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			stmt.executeQuery();
 			ResultSetMetaData meta = rset.getMetaData();
 			int columns = meta.getColumnCount();
 			// command.append("INSERT into " + tableName + " (");
@@ -321,7 +335,10 @@ public class ConfigurationDao extends GenericDAO {
 
 			}
 		} finally {
-			this.con.close();
+			// stm close
+			stmt.close();
+			rset.close();
+			con.close();
 		}
 		return sbOutputAll;
 	}
@@ -336,50 +353,53 @@ public class ConfigurationDao extends GenericDAO {
 	public void deleteTablesConfiguration() throws IOException, SQLException
 
 	{
-		this.con.setAutoCommit(false); // disabling autocommit
-		// list of table to be deleted
-		String[] tables = { "SATELLITE_PASS", "GSIF_PAW", "OBDATA_FILES", "SAT_BEAM_ASSOCIATION", "BEAM", "SENSOR_MODE",
-				"SATELLITE", "MISSION" };
-		// ManagerLogger.logDebug(this, "Reading file heading");
-
 		Statement deleteStatement = null;
-		// ManagerLogger.logDebug(this, "trying to insert data into DB");
-		this.tm.debug("Trying to clean data into DB");
 
-		// to do
+		try {
 
-		// ManagerLogger.logDebug(this, "deleted old epoch");
 
-		// for each table in list
-		// delete entries
-		for (String tableName : tables) {
+			// list of table to be deleted
+			String[] tables = { "SATELLITE_PASS", "GSIF_PAW", "OBDATA_FILES", "SAT_BEAM_ASSOCIATION", "BEAM",
+					"SENSOR_MODE", "SATELLITE", "MISSION" };
+			// ManagerLogger.logDebug(this, "Reading file heading");
 
-			try {
+			// ManagerLogger.logDebug(this, "trying to insert data into DB");
+			this.tm.debug("Trying to clean data into DB");
+
+			// to do
+
+			// ManagerLogger.logDebug(this, "deleted old epoch");
+
+			// for each table in list
+			// delete entries
+			for (String tableName : tables) {
+
 				// building delete statement
 				String deleteTable = "delete  from  " + tableName;
 				this.tm.debug("Trying to delete data from table:" + tableName);
-
-				deleteStatement = this.con.createStatement();
+				if (con == null || con.isClosed()) {
+					con = super.initConnection();
+				}
+				con.setAutoCommit(false); // disabling autocommit
+				deleteStatement = con.createStatement();
 
 				deleteStatement.executeUpdate(deleteTable);
 
 				this.tm.debug("Success deleting data from table: " + tableName);
 
-			} // end try
-			catch (SQLException e) {
-				// in case of error
-				this.tm.debug("ERROR " + e.getMessage());
+			}
+		} catch (Exception e) {
+			this.tm.debug("ERROR " + e.getMessage());
 
-			} // end catch
-			finally {
-				// close statement
-				if (deleteStatement != null) {
-					closeStatement(deleteStatement);
-				} // end if
-
-			} // end finally
-
-		} // end for
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			// close statement
+			if (deleteStatement != null) {
+				closeStatement(deleteStatement);
+			} // end if
+			con.close();
+		} // end finally
 
 	}// end method
 
@@ -412,14 +432,13 @@ public class ConfigurationDao extends GenericDAO {
 		// int idMission = 0;
 		int j = 0;
 		try {
+
 			while ((line = br.readLine()) != null) {
 				// not comment
 				if (!line.startsWith(StartComment)) {
 
 					// use | as separator
 					missionSatData = line.split("\\" + cvsSplitBy);
-
-					this.con.setAutoCommit(false);
 
 					String missionName = missionSatData[0].trim();
 
@@ -431,7 +450,12 @@ public class ConfigurationDao extends GenericDAO {
 							String uploadMission = "INSERT into MISSION (ID_MISSION, MISSION_NAME) VALUES ('" + j
 									+ "','" + missionName + "' )";
 
-							pst = this.con.prepareStatement(uploadMission);
+							if (con == null || con.isClosed()) {
+								con = super.initConnection();
+							}
+							con.setAutoCommit(false);
+
+							pst = con.prepareStatement(uploadMission);
 							// execting query
 							pst.execute();
 							allMission.add(missionName);
@@ -464,6 +488,7 @@ public class ConfigurationDao extends GenericDAO {
 			if (br != null) {
 				br.close();
 			}
+			con.close();
 		} // enf finally
 
 	}// end method
@@ -483,15 +508,10 @@ public class ConfigurationDao extends GenericDAO {
 		String line = "";
 		String cvsSplitBy = "|"; // token separator
 		PreparedStatement pstm = null;
-		// -
-		// -
-		// -
-		// -
+
 		try {
 			LinkedHashSet<String> allSensorModes = new LinkedHashSet<>();
 			// disable autocommit
-			this.con.setAutoCommit(false);
-
 			String[] sensorModeNames;
 			br1 = new BufferedReader(new FileReader(csvFile));
 			int j = 0;
@@ -519,7 +539,12 @@ public class ConfigurationDao extends GenericDAO {
 							String uploadSensorMode = "INSERT into SENSOR_MODE (ID_SENSOR_MODE, SENSOR_MODE_NAME,IS_SPOT_LIGHT) VALUES ('"
 									+ j + "','" + sensorModeName + "'" + "," + isSpotLight + " )";
 
-							pstm = this.con.prepareStatement(uploadSensorMode);
+							if (con == null || con.isClosed()) {
+								con = super.initConnection();
+							}
+							con.setAutoCommit(false);
+
+							pstm = con.prepareStatement(uploadSensorMode);
 							// executing query
 							pstm.execute();
 
@@ -550,6 +575,7 @@ public class ConfigurationDao extends GenericDAO {
 			if (br1 != null) {
 				br1.close();
 			}
+			con.close();
 		} // end finally
 
 	}// end method
@@ -579,15 +605,13 @@ public class ConfigurationDao extends GenericDAO {
 		PreparedStatement pst = null;
 
 		try {
+
 			while ((line = br.readLine()) != null) {
 				if (!line.startsWith(StartComment)) {
 
 					// use | as separator
 					missionSatData = line.split("\\" + cvsSplitBy);
 					if (missionSatData.length > 10) {
-
-						// set autocommit to false
-						this.con.setAutoCommit(false);
 						int isEnabled = 0;
 						int idAllowedLookSide = 0;
 						// getting mission
@@ -622,9 +646,13 @@ public class ConfigurationDao extends GenericDAO {
 							String uploadSat = "INSERT into SATELLITE (ID_SATELLITE, SATELLITE_NAME,MISSION,IS_ENABLED,ID_ALLOWED_LOOK_SIDE, TRACK_OFFSET) VALUES ("
 									+ i + ",'" + satelliteName + "'," + idMission + "," + isEnabled + ","
 									+ idAllowedLookSide + "," + offset + " )";
-
+							if (con == null || con.isClosed()) {
+								con = super.initConnection();
+							}
+							// set autocommit to false
+							con.setAutoCommit(false);
 							// //System.out.println(uploadSat);
-							pst = this.con.prepareStatement(uploadSat);
+							pst = con.prepareStatement(uploadSat);
 							// executing query
 							pst.execute();
 							allSat.add(satelliteName);
@@ -650,6 +678,7 @@ public class ConfigurationDao extends GenericDAO {
 			if (br != null) {
 				br.close();
 			}
+			con.close();
 		} // end finally
 
 	}// end method
@@ -674,8 +703,7 @@ public class ConfigurationDao extends GenericDAO {
 		PreparedStatement pstm = null;
 		try {
 			LinkedHashSet<String> allBeams = new LinkedHashSet<>();
-			// set autocommit to false
-			this.con.setAutoCommit(false);
+
 			String[] sensorModeNames;
 			br = new BufferedReader(new FileReader(csvFile));
 			int i = 0;
@@ -744,8 +772,14 @@ public class ConfigurationDao extends GenericDAO {
 									+ swDim1 + "," + swDim2 + "," + dtoMinDuration + "," + dtoMaxDuration + ","
 									+ resTime + "," + dtoDurationSquared + ")";
 
+							if (con == null || con.isClosed()) {
+								con = super.initConnection();
+							}
+							// set autocommit to false
+							con.setAutoCommit(false);
+
 							// //System.out.println(uploadBeam);
-							pstm = this.con.prepareStatement(uploadBeam);
+							pstm = con.prepareStatement(uploadBeam);
 							// executing query
 							pstm.execute();
 							allBeams.add(beamName);
@@ -773,6 +807,7 @@ public class ConfigurationDao extends GenericDAO {
 			if (br != null) {
 				br.close();
 			}
+			con.close();
 		} // end finally
 	}// end method
 
@@ -795,9 +830,12 @@ public class ConfigurationDao extends GenericDAO {
 		String cvsSplitBy = "|";
 		PreparedStatement pstm = null;
 		try {
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
 			LinkedHashSet<String> allBeams = new LinkedHashSet<>();
 			// set autocommit to false
-			this.con.setAutoCommit(false);
+			con.setAutoCommit(false);
 			String[] sensorModeNames;
 			br = new BufferedReader(new FileReader(csvFile));
 			int i = 0;
@@ -867,9 +905,11 @@ public class ConfigurationDao extends GenericDAO {
 									+ nearOffNadir + "," + farOffNadir + "," + idSensorMode + "," + isEnabled + ","
 									+ swDim1 + "," + swDim2 + "," + dtoMinDuration + "," + dtoMaxDuration + ","
 									+ resTime + "," + dtoDurationSquared + ")";
-
+							if (con == null || con.isClosed()) {
+								con = super.initConnection();
+							}
 							// //System.out.println(uploadBeam);
-							pstm = this.con.prepareStatement(uploadBeam);
+							pstm = con.prepareStatement(uploadBeam);
 							// executing query
 							pstm.execute();
 							allBeams.add(beamName);
@@ -897,234 +937,198 @@ public class ConfigurationDao extends GenericDAO {
 			if (br != null) {
 				br.close();
 			}
+			con.close();
 		} // end finally
 	}// end method
 
 	/**
-     * Import beam form file
-     * 
-     * @author Abed Alissa
-     * @version 1.0
-     * @date
-     * @param csvFile
-     * @throws Exception
-     */
-    public void updateBeamCsv(List<BeamBean> allBeamsList,File csvFile) throws Exception
-    {
-        // populate beam table
-        // staring from files
-        // reader
-        BufferedReader br = null;
-        String line = "";
-        // split char
-        String cvsSplitBy = "|";
-        PreparedStatement pstm = null;
-        try
-        {
-            LinkedHashSet<String> allBeams = new LinkedHashSet<>();
-            // set autocommit to false
-            this.con.setAutoCommit(false);
-            String[] sensorModeNames;
-            br = new BufferedReader(new FileReader(csvFile));
-            int i = 0;
-            // for each line
-            while ((line = br.readLine()) != null)
-            {
-                if (!line.startsWith(StartComment))
-                {
-                    // use comma as separator
-                    // list tokens
-                    sensorModeNames = line.split("\\" + cvsSplitBy);
+	 * Import beam form file
+	 * 
+	 * @author Abed Alissa
+	 * @version 1.0
+	 * @date
+	 * @param csvFile
+	 * @throws Exception
+	 */
+	public void updateBeamCsv(List<BeamBean> allBeamsList, File csvFile) throws Exception {
+		// populate beam table
+		// staring from files
+		// reader
+		BufferedReader br = null;
+		String line = "";
+		// split char
+		String cvsSplitBy = "|";
+		PreparedStatement pstm = null;
+		System.out.println(" all beams as list : " + allBeamsList);
 
-                    if (sensorModeNames.length > 10)
-                    {
-                        // extract sensormode
-                        String sensorModeName = sensorModeNames[1].trim();
-                        // extract beam
-                        String beamName = sensorModeNames[8].trim();
-           
-                        
-                        // get sensormode id
-                        int idSensorMode = getIdSensorMode(sensorModeName);
-                        while (!allBeams.contains(beamName))
-                        {
-                            i++;
-                            // getting angles
-                            double nearOffNadir = Double.parseDouble(sensorModeNames[9].trim());
-                            double farOffNadir = Double.parseDouble(sensorModeNames[10].trim());
+		try {
+
+			LinkedHashSet<String> allBeams = new LinkedHashSet<>();
+
+			String[] sensorModeNames;
+			br = new BufferedReader(new FileReader(csvFile));
+			int i = 0;
+			// for each line
+			while ((line = br.readLine()) != null) {
+				if (!line.startsWith(StartComment)) {
+					// use comma as separator
+					// list tokens
+					sensorModeNames = line.split("\\" + cvsSplitBy);
+
+					if (sensorModeNames.length > 10) {
+					
+						// extract sensormode
+						String sensorModeName = sensorModeNames[1].trim();
+						// extract beam
+						String beamName = sensorModeNames[8].trim();
+
+						// get sensormode id
+						int idSensorMode = getIdSensorMode(sensorModeName);
+						while (!allBeams.contains(beamName)) {
+							i++;
+							// getting angles
+							double nearOffNadir = Double.parseDouble(sensorModeNames[9].trim());
+							double farOffNadir = Double.parseDouble(sensorModeNames[10].trim());
 
 //                            double nearOffNadirSat = Double.parseDouble(sensorModeNames[6].trim());
 //                            // extracting off nadir angles
 //                            double farOffNadirSat = Double.parseDouble(sensorModeNames[7].trim());
 
-                            String isEnabledString = sensorModeNames[11].trim();
-                            int isEnabled = 0;
+							String isEnabledString = sensorModeNames[11].trim();
+							int isEnabled = 0;
 
-                            // evaluating foe enables
-                            if (isEnabledString.equalsIgnoreCase("Yes"))
-                            {
-                                isEnabled = 1;
-                            }
-                            else
-                            {
-                                isEnabled = 0;
-                            } // end else
-                              // extracting dimensions
-                            double swDim1 = Double.parseDouble(sensorModeNames[12].trim());
-                            double swDim2 = Double.parseDouble(sensorModeNames[13].trim());
-                            // extracting durations
-                            int dtoMinDuration = Integer.parseInt(sensorModeNames[15].trim());
-                            int dtoMaxDuration = Integer.parseInt(sensorModeNames[16].trim());
-                            int resTime = Integer.parseInt(sensorModeNames[17].trim());
-                            int dtoDurationSquared = 0;
-                            String query = null;
-                            if(sensorModeNames.length > 18)
-                            {
-                            	try
-                            	{
-                                    dtoDurationSquared = Integer.parseInt(sensorModeNames[18].trim());
-                            	}
-                            	catch(Exception e)
-                            	{
-                            		dtoDurationSquared = 0;
-                            		continue;
-                            	}
-                            }
-                            
-                            BeamBean dummyBean = createBeam(i,beamName,nearOffNadir,farOffNadir,idSensorMode,isEnabled,swDim1,swDim2,dtoMinDuration,dtoMaxDuration,resTime,dtoDurationSquared);
-                            BeamBean existBeam = existBeam(allBeamsList,dummyBean);
-                            if(existBeam!=null)
-                            {
-                            	//Beam exist, check if there is something different
-                                boolean isChanged = checkIfIsDifferent(existBeam,dummyBean);
-                                if(isChanged)
-                                {
-                                	//update it
-                                	System.out.println("go in update!");
-                                	//beam doesn't exist, add it !
-                                	
-                                	query = "UPDATE BEAM "
-                                			+ "SET NEAR_OFF_NADIR = "+nearOffNadir+""
-                                					+ ", FAR_OFF_NADIR = "+ farOffNadir+""
-                                							+ ", SENSOR_MODE = "+idSensorMode+ ""
-                                									+ ",IS_ENABLED = "+isEnabled+""
-                                											+ ",SW_DIM1 ="+swDim1+""
-                                													+ "SW_DIM2 = "+swDim2+""
-                                															+ "DTO_MIN_DURATION ="+dtoMinDuration+""
-                                																	+ "DTO_MAX_DURATION = "+dtoMaxDuration+""
-                                																			+ "RES_TIME = "+resTime+""
-                                																					+ "DTO_DURATION_SQUARED = "+dtoDurationSquared+""
-                                																							+ " WHERE ID_BEAM = "+i+" AND BEAM_NAME = "+beamName+";";
-                                			
-                                }
-                                else
-                                {
-                                	//nothing to do
-                                }
+							// evaluating foe enables
+							if (isEnabledString.equalsIgnoreCase("Yes")) {
+								isEnabled = 1;
+							} else {
+								isEnabled = 0;
+							} // end else
+								// extracting dimensions
+							double swDim1 = Double.parseDouble(sensorModeNames[12].trim());
+							double swDim2 = Double.parseDouble(sensorModeNames[13].trim());
+							// extracting durations
+							int dtoMinDuration = Integer.parseInt(sensorModeNames[15].trim());
+							int dtoMaxDuration = Integer.parseInt(sensorModeNames[16].trim());
+							int resTime = Integer.parseInt(sensorModeNames[17].trim());
+							int dtoDurationSquared = 0;
+							String query = null;
+							if (sensorModeNames.length > 18) {
+								try {
+									dtoDurationSquared = Integer.parseInt(sensorModeNames[18].trim());
+								} catch (Exception e) {
+									dtoDurationSquared = 0;
+									continue;
+								}
+							}
 
-                            }
-                            else
-                            {
-                            	//beam doesn't exist, add it !
-                            	System.out.println("go in insert!");
-                            	query = "INSERT into BEAM ("
-                                         + "ID_BEAM, "
-                                         + "BEAM_NAME,"
-                                         + "NEAR_OFF_NADIR,"
-                                         + "FAR_OFF_NADIR, "
-                                         +"SENSOR_MODE,"
-                                         + "IS_ENABLED,"
-                                         + "SW_DIM1,"
-                                         + "SW_DIM2,"
-                                         + "DTO_MIN_DURATION,"
-                                         + "DTO_MAX_DURATION, "
-                                         + "RES_TIME, "
-                                         + "DTO_DURATION_SQUARED) "
-                                         + ""
-                                         + "VALUES (" 
-                                         + i + ",'" 
-                                         + beamName + "'," 
-                                         + nearOffNadir + "," 
-                                         + farOffNadir + "," 
-                                         + idSensorMode + "," 
-                                         + isEnabled + "," 
-                                         + swDim1 + "," 
-                                         + swDim2 + "," 
-                                         + dtoMinDuration + "," 
-                                         + dtoMaxDuration + "," 
-                                         + resTime + ","
-                                         +dtoDurationSquared+")";
+							BeamBean dummyBean = createBeam(i, beamName, nearOffNadir, farOffNadir, idSensorMode,
+									isEnabled, swDim1, swDim2, dtoMinDuration, dtoMaxDuration, resTime,
+									dtoDurationSquared);
+							
+							System.out.println(" create a dummy beam for element "+dummyBean);
 
-                            }
-                            
-                            System.out.println("PRINT QUERY :"+query);
-                            if(query !=null)
-                            {
-                                // //System.out.println(uploadBeam);
-                                pstm = this.con.prepareStatement(query);
-                                // executing query
-                                pstm.execute();
-              
-                                pstm.close();
-                            }
-                            if(!allBeams.contains(beamName))
-                            {
-                                allBeams.add(beamName);
-                            }
-                            pstm = null;
+							BeamBean existBeam = existBeam(allBeamsList, dummyBean);
+							System.out.println(" check if exist another beam with same beam name and same beamId -> returned : "+existBeam);
 
-                        } // end while
+							if (existBeam != null) {
+								// Beam exist, check if there is something different
+								boolean isChanged = checkIfIsDifferent(existBeam.toString(), dummyBean.toString());
+								
+								System.out.println("Check if there are changes between these beams -> "+isChanged);
+								if (isChanged) {
+									// update it
+									System.out.println("go in update!");
+									// beam doesn't exist, add it !
 
-                    }
-                } // end if
-            } // end while
+									query = "UPDATE BEAM " + "SET NEAR_OFF_NADIR = " + nearOffNadir + ""
+											+ ", FAR_OFF_NADIR = " + farOffNadir + "" + ", SENSOR_MODE = "
+											+ idSensorMode + "" + ",IS_ENABLED = " + isEnabled + "" + ",SW_DIM1 ="
+											+ swDim1 + "" + ",SW_DIM2 = " + swDim2 + "" + ",DTO_MIN_DURATION ="
+											+ dtoMinDuration + "" + ",DTO_MAX_DURATION = " + dtoMaxDuration + ""
+											+ ",RES_TIME = " + resTime + "" + ",DTO_DURATION_SQUARED = "
+											+ dtoDurationSquared + "" + " WHERE ID_BEAM = " + i + " AND BEAM_NAME = "
+											+ "'" + beamName + "'";
 
-        } // end try
-        catch (SQLException | IOException ex)
-        {
-            // rethrow
-            this.tm.critical(EventType.SOFTWARE_EVENT, "Error import csv to BEAM table: ", ex.getMessage());
-            throw ex;
-        } // end catch
-        finally
-        {
-            // clse statement
-            if (pstm != null)
-            {
-                pstm.close();
-            }
-            // close reader
-            if (br != null)
-            {
-                br.close();
-            }
-        } // end finally
-    }// end method
+								} else {
+									// nothing to do
+								System.out.println("nothing to do");
+								}
 
-	private boolean checkIfIsDifferent(BeamBean existBeam, BeamBean dummyBean) {
+							} else {
+								// beam doesn't exist, add it !
+							System.out.println("go in insert!");
+								query = "INSERT into BEAM (" + "ID_BEAM, " + "BEAM_NAME," + "NEAR_OFF_NADIR,"
+										+ "FAR_OFF_NADIR, " + "SENSOR_MODE," + "IS_ENABLED," + "SW_DIM1," + "SW_DIM2,"
+										+ "DTO_MIN_DURATION," + "DTO_MAX_DURATION, " + "RES_TIME, "
+										+ "DTO_DURATION_SQUARED) " + "" + " VALUES (" + i + ",'" + beamName + "',"
+										+ nearOffNadir + "," + farOffNadir + "," + idSensorMode + "," + isEnabled + ","
+										+ swDim1 + "," + swDim2 + "," + dtoMinDuration + "," + dtoMaxDuration + ","
+										+ resTime + "," + dtoDurationSquared + ")";
+
+							}
+							System.out.println("PRINT QUERY :" + query);
+							if (query != null) {
+								
+								if (con == null || con.isClosed()) {
+									con = super.initConnection();
+								}
+								// set autocommit to false
+								con.setAutoCommit(false);
+								
+								// //System.out.println(uploadBeam);
+								pstm = con.prepareStatement(query);
+								// executing query
+								pstm.execute();
+
+								pstm.close();
+							}
+							if (!allBeams.contains(beamName)) {
+								allBeams.add(beamName);
+							}
+							pstm = null;
+
+						} // end while
+
+					}
+				} // end if
+			} // end while
+
+		} // end try
+		catch (SQLException | IOException ex) {
+			// rethrow
+			this.tm.critical(EventType.SOFTWARE_EVENT, "Error import csv to BEAM table: ", ex.getMessage());
+			throw ex;
+		} // end catch
+		finally {
+			// clse statement
+			if (pstm != null) {
+				pstm.close();
+			}
+			// close reader
+			if (br != null) {
+				br.close();
+			}
+			con.close();
+		} // end finally
+	}// end method
+
+	public static boolean checkIfIsDifferent(String existBeam, String dummyBeam) {
 		// TODO Auto-generated method stub
 		boolean changed = false;
-		System.out.println("check between exist beam : "+existBeam);
-		System.out.println("and dummyBean : "+dummyBean);
+//		System.out.println("check between exist beam : " + existBeam);
+//		System.out.println("and dummyBean : " + dummyBean);
 
-		if(existBeam.toString()==dummyBean.toString())
-		{
-			System.out.println("same beams, nothing to do");
-		}
-		else
-		{
-			System.out.println("changed beam!");
-			changed= true;
+		if (!existBeam.equalsIgnoreCase(dummyBeam)) {
+			changed = true;
 		}
 		return changed;
 	}
-
 
 	private BeamBean existBeam(List<BeamBean> allBeamsList, BeamBean dummyBean) {
 		BeamBean beamReturned = null;
 		for (int i = 0; i < allBeamsList.size(); i++) {
 			BeamBean currentBeam = allBeamsList.get(i);
-			if (currentBeam.getBeamName() == dummyBean.getBeamName()
+			if (currentBeam.getBeamName().equalsIgnoreCase(dummyBean.getBeamName())
 					&& currentBeam.getIdBeam() == dummyBean.getIdBeam()) {
 				beamReturned = currentBeam;
 				break;
@@ -1147,6 +1151,7 @@ public class ConfigurationDao extends GenericDAO {
 		beam.setSwDim2(swDim2);
 		beam.setDtoMinDuration(dtoMinDuration);
 		beam.setDtoMaxDuration(dtoMaxDuration);
+		beam.setResTime(resTime);
 		beam.setDtoDurationSquared(dtoDurationSquared);
 		return beam;
 	}
@@ -1160,17 +1165,19 @@ public class ConfigurationDao extends GenericDAO {
 	 * @param csvFile
 	 * @throws Exception
 	 */
-	public void alterTableBeam(File csvFile) throws Exception {
+	public void alterTableBeam() throws Exception {
 		PreparedStatement pstm = null;
 		try {
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
 			// set autocommit to false
-			this.con.setAutoCommit(false);
+			con.setAutoCommit(false);
 
-			String alterTable = "ALTER TABLE BEAM " + "    ADD DTO_DURATION_SQUARED NUMBER(11) NOT NULL "
-					+ "    CONSTRAINT duration_Squared DEFAULT 0;";
-
-			// //System.out.println(uploadBeam);
-			pstm = this.con.prepareStatement(alterTable);
+			String alterTable = "ALTER TABLE BEAM ADD DTO_DURATION_SQUARED NUMBER(11) DEFAULT 0";
+	
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
 			// executing query
 			pstm.execute();
 			pstm.close();
@@ -1187,6 +1194,7 @@ public class ConfigurationDao extends GenericDAO {
 			if (pstm != null) {
 				pstm.close();
 			}
+			con.close();
 		} // end finally
 	}// end method
 
@@ -1206,12 +1214,10 @@ public class ConfigurationDao extends GenericDAO {
 		PreparedStatement pstmt = null;
 		int i = 0;
 		try {
-			this.con.setAutoCommit(false);
 
 			String[] satBeamAssociation;
 			br = new BufferedReader(new FileReader(csvFile));
 			while ((line = br.readLine()) != null) {
-
 				if (!line.startsWith(StartComment)) {
 					i++;
 					// use comma as separator
@@ -1232,16 +1238,35 @@ public class ConfigurationDao extends GenericDAO {
 						String uploadAss = "INSERT into SAT_BEAM_ASSOCIATION (ID_BEAM_ASSOCIATION, SATELLITE,BEAM) VALUES ("
 								+ i + "," + idSatellite + "," + idBeam + ")";
 						// building statement
-						pstmt = this.con.prepareStatement(uploadAss);
+
+						if (con == null || con.isClosed()) {
+							// System.out.println(" connection was closed");
+
+							con = super.initConnection();
+						}
+
+						con.setAutoCommit(false);
+						// System.out.println("after autocommit");
+
+						// Statement statement = con.createStatement();
+
+						// Esecuzione di un comando sul DB
+						// ResultSet rs = statement.executeQuery(uploadAss);
+
+						//
+
+						// //System.out.println(uploadBeam);
+						pstmt = con.prepareStatement(uploadAss);
+
 						// executing query
 						pstmt.execute();
 						pstmt.close();
 						pstmt = null;
+
 					} // end if
 				} // end if
 
 			} // end while
-
 		} // end try
 		catch (SQLException | IOException ex) {
 			// rethrowing
@@ -1250,7 +1275,7 @@ public class ConfigurationDao extends GenericDAO {
 			throw ex;
 		} // clase catch
 		finally {
-			// close statement
+			// clse statement
 			if (pstmt != null) {
 				pstmt.close();
 			}
@@ -1258,6 +1283,7 @@ public class ConfigurationDao extends GenericDAO {
 			if (br != null) {
 				br.close();
 			}
+			con.close();
 		} // end finally
 
 	}// end method
@@ -1280,8 +1306,10 @@ public class ConfigurationDao extends GenericDAO {
 		try {
 
 			// ManagerLogger.logDebug(this, query);
-
-			PreparedStatement st = this.con.prepareStatement(query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			PreparedStatement st = con.prepareStatement(query);
 			ResultSet rs = null;
 
 			try {
@@ -1302,7 +1330,7 @@ public class ConfigurationDao extends GenericDAO {
 				}
 				// close statement
 				st.close();
-
+				con.close();
 			} // end finally
 		} // end try
 		catch (Exception e) {
@@ -1333,8 +1361,10 @@ public class ConfigurationDao extends GenericDAO {
 		try {
 
 			// ManagerLogger.logDebug(this, query);
-
-			PreparedStatement st = this.con.prepareStatement(query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			PreparedStatement st = con.prepareStatement(query);
 			ResultSet rs = null;
 
 			try {
@@ -1355,7 +1385,7 @@ public class ConfigurationDao extends GenericDAO {
 				}
 				// close statement
 				st.close();
-
+				con.close();
 			} // end finally
 		} catch (Exception e)
 
@@ -1387,8 +1417,10 @@ public class ConfigurationDao extends GenericDAO {
 		try {
 
 			// ManagerLogger.logDebug(this, query);
-
-			PreparedStatement st = this.con.prepareStatement(query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			PreparedStatement st = con.prepareStatement(query);
 			ResultSet rs = null;
 
 			try {
@@ -1419,6 +1451,8 @@ public class ConfigurationDao extends GenericDAO {
 			throw e;
 		} // end catch
 			// returning
+
+		con.close();
 		return idBeam;
 	}// end method
 
@@ -1433,10 +1467,12 @@ public class ConfigurationDao extends GenericDAO {
 		// delete statement
 		String query = "delete from SENSOR_MODE";
 		try {
-
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
 			// ManagerLogger.logDebug(this, query);
 			// managed query
-			PreparedStatement st = this.con.prepareStatement(query);
+			PreparedStatement st = con.prepareStatement(query);
 			ResultSet rs = null;
 
 			try {
@@ -1460,7 +1496,9 @@ public class ConfigurationDao extends GenericDAO {
 			throw e;
 
 		} // end catch
-
+		finally {
+			con.close();
+		}
 	}// end method
 
 	/**
@@ -1482,8 +1520,10 @@ public class ConfigurationDao extends GenericDAO {
 		try {
 
 			// ManagerLogger.logDebug(this, query);
-
-			PreparedStatement st = this.con.prepareStatement(query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			PreparedStatement st = con.prepareStatement(query);
 			ResultSet rs = null;
 
 			try {
@@ -1516,6 +1556,9 @@ public class ConfigurationDao extends GenericDAO {
 
 		} // end catch
 			// returning
+		finally {
+			con.close();
+		}
 		return idSensorMode;
 	}// end method
 
@@ -1536,8 +1579,10 @@ public class ConfigurationDao extends GenericDAO {
 		try {
 
 			// ManagerLogger.logDebug(this, query);
-
-			PreparedStatement st = this.con.prepareStatement(query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			PreparedStatement st = con.prepareStatement(query);
 			ResultSet rs = null;
 
 			try {
@@ -1559,11 +1604,12 @@ public class ConfigurationDao extends GenericDAO {
 				}
 				// closing statement
 				st.close();
-
+				con.close();
 			} // end finally
 		} catch (Exception e)
 
 		{
+			con.close();
 			// rethrowing
 			this.tm.critical(EventType.SOFTWARE_EVENT, "Execution error of the query by prepared statement: " + query,
 					e.getMessage());

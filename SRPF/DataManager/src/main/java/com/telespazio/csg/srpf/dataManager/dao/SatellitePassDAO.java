@@ -105,8 +105,12 @@ public class SatellitePassDAO extends GenericDAO
         try
 
         {
-            this.con.setAutoCommit(false); // no autocommit
-            insertStatement = this.con.prepareStatement(SatellitePassInsert);
+    		if(con==null || con.isClosed())
+    		{
+    			con = super.initConnection();
+    		}
+            con.setAutoCommit(false); // no autocommit
+            insertStatement = con.prepareStatement(SatellitePassInsert);
             // looping on pass
             for (SatellitePassBean satPass : satellitePassList)
             {
@@ -135,7 +139,7 @@ public class SatellitePassDAO extends GenericDAO
 
         {
             // rollback
-            this.con.rollback();
+            con.rollback();
             // close statenment
             closeStatement(insertStatement);
 
@@ -145,6 +149,7 @@ public class SatellitePassDAO extends GenericDAO
         {
             // close statement
             closeStatement(insertStatement);
+            con.close();
         } // end finally
 
         this.tm.debug("Data inserted");
@@ -167,10 +172,17 @@ public class SatellitePassDAO extends GenericDAO
         String satName;
         int satId;
 
-        PreparedStatement st = this.con.prepareStatement(query);
+        PreparedStatement st = null;
         ResultSet rs = null;
         try
         {
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
+			st = con.prepareStatement(query);
+			
             // executing
             this.tm.debug("Inside method getSatelliteMapID: " + query);
             rs = st.executeQuery();
@@ -193,7 +205,12 @@ public class SatellitePassDAO extends GenericDAO
             // log
             this.tm.critical(EventType.SOFTWARE_EVENT, "Execution error of the query by prepared statement: ", e.getMessage());
             // rethrow
-            throw e;
+            try {
+				throw e;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
         } // end catch
         finally
@@ -205,7 +222,7 @@ public class SatellitePassDAO extends GenericDAO
             }
             // close stm
             st.close();
-
+            con.close();
         } // end finally
 
         // returning map
@@ -221,9 +238,14 @@ public class SatellitePassDAO extends GenericDAO
     {
         Statement deleteStatement = null;
         // no autocommit
-        this.con.setAutoCommit(false);
+        con.setAutoCommit(false);
         try
         {
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
             // for each pass delete in DB
             for (SatellitePassBean satPass : satPassList)
             {
@@ -234,7 +256,7 @@ public class SatellitePassDAO extends GenericDAO
                 } // end if
                   // stm string
                 String deleteString = "delete from SATELLITE_PASS where SATELLITE=" + satelliteId.intValue() + " and ASID=" + satPass.getAsId() + " and CONTACT_COUNTER=" + satPass.getCntactCounter();
-                deleteStatement = this.con.createStatement();
+                deleteStatement = con.createStatement();
                 deleteStatement.executeUpdate(deleteString);
                 closeStatement(deleteStatement);
             } // end for
@@ -246,8 +268,13 @@ public class SatellitePassDAO extends GenericDAO
             // rollback
             // rethorw
             this.tm.warning(EventType.APPLICATION_EVENT, ProbableCause.APPLICATION_SUBSYSTEM_FAILURE, e.getMessage());
-            this.con.rollback();
-            throw e;
+            con.rollback();
+            try {
+				throw e;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         } // end catch
         finally
         {
@@ -257,6 +284,7 @@ public class SatellitePassDAO extends GenericDAO
                 ;
             }
             closeStatement(deleteStatement);
+            con.close();
         } // end finally
     }// End Method
 
@@ -278,15 +306,22 @@ public class SatellitePassDAO extends GenericDAO
         String query = "SELECT  SATELLITE, ASID , CONTACT_COUNTER, VISIBILITY_START_TIME, VISIBILITY_STOP_TIME" + " FROM SATELLITE_PASS where SATELLITE=" + idSatellite + " and VISIBILITY_START_TIME >" + initialEpoch + " AND VISIBILITY_START_TIME<" + finalEpoch + " AND VISIBILITY_STOP_TIME>" + initialEpoch + " AND VISIBILITY_STOP_TIME<" + finalEpoch;
 
         this.tm.debug(" selectPawDataAll:  " + query);
-        this.con.setAutoCommit(false); // autocmmint false
 
-        PreparedStatement st = this.con.prepareStatement(query);
+        PreparedStatement st = null;
         ResultSet rs = null;
         ArrayList<SatellitePassBean> satPassList = new ArrayList<>();
 
         SatellitePassBean satPassData = null;
         try
         {
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
+	        con.setAutoCommit(false); // autocmmint false
+
+			st = con.prepareStatement(query);
             // executing query
             rs = st.executeQuery();
             // getting data
@@ -318,7 +353,8 @@ public class SatellitePassDAO extends GenericDAO
             }
             // close stm
             st.close();
-            // con.close();
+            con.close();
+//            con.close();
         } // end finally
         return satPassList;
     } // end method
@@ -369,15 +405,22 @@ public class SatellitePassDAO extends GenericDAO
         String query = "SELECT sp.SATELLITE, sp.ASID , sp.CONTACT_COUNTER, sp.VISIBILITY_START_TIME, sp.VISIBILITY_STOP_TIME, s.SATELLITE_NAME" + " FROM SATELLITE_PASS sp inner join SATELLITE s on sp.SATELLITE=s.ID_SATELLITE where sp.SATELLITE=" + idSatellite + " and sp.VISIBILITY_START_TIME >" + initialEpoch + " AND sp.VISIBILITY_START_TIME< " + finalEpoch + " AND sp.VISIBILITY_STOP_TIME>" + initialEpoch + " AND sp.VISIBILITY_STOP_TIME<" + finalEpoch + " and (" + asIdClause + ")";
 
         this.tm.debug(" selectSatellitePass:  " + query);
-        this.con.setAutoCommit(false);
+        con.setAutoCommit(false);
         // no autocommit
-        PreparedStatement st = this.con.prepareStatement(query);
+        PreparedStatement st =null;
         ResultSet rs = null;
         ArrayList<SatellitePassBean> satPassList = new ArrayList<>();
         // pass
         SatellitePassBean satPassData = null;
         try
         {
+        	
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
+			st = con.prepareStatement(query);
             // executing query
             rs = st.executeQuery();
             // getting data
@@ -409,7 +452,8 @@ public class SatellitePassDAO extends GenericDAO
             }
             // close stm
             st.close();
-            // con.close();
+            con.close();
+//            con.close();
         } // end finally
         return satPassList;
     } // end method
@@ -462,7 +506,7 @@ public class SatellitePassDAO extends GenericDAO
 
         this.tm.debug(" selectSatellitePass:  " + query);
         // statement
-        PreparedStatement st = this.con.prepareStatement(query);
+        PreparedStatement st =null;
         ResultSet rs = null;
         ArrayList<SatellitePassBean> satPassList = new ArrayList<>();
         // sta pass
@@ -471,6 +515,13 @@ public class SatellitePassDAO extends GenericDAO
         String newSatellite = "";
         try
         {
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
+			st = con.prepareStatement(query);
+			
             // executing query
             rs = st.executeQuery();
             // getting data
@@ -510,7 +561,7 @@ public class SatellitePassDAO extends GenericDAO
             }
             // close stm
             st.close();
-            // con.close();
+           con.close();
         } // end finally
         return satPassMap;
     } // end method
@@ -529,16 +580,26 @@ public class SatellitePassDAO extends GenericDAO
         Statement deleteStatement = null;
         try
         {
-            this.con.setAutoCommit(false); // no autocommit
-            deleteStatement = this.con.createStatement(); // creating
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
+            con.setAutoCommit(false); // no autocommit
+            deleteStatement = con.createStatement(); // creating
             deleteStatement.executeUpdate(deleteStatementString); // executing
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
             // rollback
-            this.con.rollback();
+            con.rollback();
             // rethrow
-            throw e;
+            try {
+				throw e;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         } // end catch
         finally
         {
@@ -546,6 +607,7 @@ public class SatellitePassDAO extends GenericDAO
             {
                 closeStatement(deleteStatement);
             } // end if
+            con.close();
         } // end finally
 
     }// end method
@@ -569,18 +631,27 @@ public class SatellitePassDAO extends GenericDAO
         } // end if
         Statement deleteStatement = null;
         try
-        {
+        {			if (con == null || con.isClosed()) {
+
+			con = initConnection();
+			
+			}
             // autocommit false
-            this.con.setAutoCommit(false);
-            deleteStatement = this.con.createStatement();
+            con.setAutoCommit(false);
+            deleteStatement = con.createStatement();
             deleteStatement.executeUpdate(deleteStatementString);
         }
-        catch (SQLException e)
+        catch ( Exception e)
         {
             // rollback
-            this.con.rollback();
+            con.rollback();
             // rethrow
-            throw e;
+            try {
+				throw e;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         } // end catch
         finally
         {
@@ -588,6 +659,7 @@ public class SatellitePassDAO extends GenericDAO
             {
                 closeStatement(deleteStatement);
             } // end if
+            con.close();
         } // end finally
 
     }// end method
@@ -622,17 +694,27 @@ public class SatellitePassDAO extends GenericDAO
 
         try
         {
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
             // no autocommit
-            this.con.setAutoCommit(false);
-            deleteStatement = this.con.createStatement();
+            con.setAutoCommit(false);
+            deleteStatement = con.createStatement();
             deleteStatement.executeUpdate(deleteStatementString);
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
             // rollback
-            this.con.rollback();
+            con.rollback();
             // rethrow
-            throw e;
+            try {
+				throw e;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         } // end cacth
         finally
         {
@@ -640,6 +722,7 @@ public class SatellitePassDAO extends GenericDAO
             {
                 closeStatement(deleteStatement);
             } // end if
+             con.close();
         } // end finally
 
     }// end method
@@ -663,8 +746,14 @@ public class SatellitePassDAO extends GenericDAO
         try
 
         {
-            this.con.setAutoCommit(false);
-            updateStatement = this.con.prepareStatement(update);
+			if (con == null || con.isClosed()) {
+
+				con = initConnection();
+				
+				}
+	
+            con.setAutoCommit(false);
+            updateStatement = con.prepareStatement(update);
             // updating for each pass
             for (SatellitePassBean satPass : satellitePassList)
             {
@@ -714,14 +803,14 @@ public class SatellitePassDAO extends GenericDAO
 
         } // end try
 
-        catch (NoSuchElementException e)
+        catch (Exception e)
 
         {
         	 // System.out.println("NoSuchElementException");
 
-            this.con.rollback();
+            con.rollback();
 
-            closeStatement(updateStatement);
+//            closeStatement(updateStatement);
 
         } // end catch
 
@@ -729,6 +818,7 @@ public class SatellitePassDAO extends GenericDAO
         {
 
             closeStatement(updateStatement);
+            con.close();
         } // end finally
 
         this.tm.debug("Data inserted");

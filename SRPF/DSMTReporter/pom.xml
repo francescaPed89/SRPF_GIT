@@ -2,12 +2,12 @@
   <parent>
     <groupId>com.telespazio.csg</groupId>
     <artifactId>SRPF</artifactId>
-    <version>2.2.8p</version>
+    <version>2.2.9p</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.telespazio.csg.srpf</groupId>
   <artifactId>DSTMReporter</artifactId>
-  <version>2.2.8p</version>
+  <version>2.2.9p</version>
   <name>DSTMReporter</name>
   <build>
     <testResources>
@@ -41,12 +41,12 @@
 	<dependency>
                 <groupId>com.telespazio.csg.srpf</groupId>
                 <artifactId>utils</artifactId>
-                <version>2.2.8p</version>
+                <version>2.2.9p</version>
         </dependency>
 	<dependency>
 		<groupId>com.telespazio.csg.srpf</groupId>
                 <artifactId>eventlog</artifactId>
-                <version>2.2.8p</version>
+                <version>2.2.9p</version>
         </dependency>
 	 <dependency>
         <groupId>com.telespazio.csg.cm</groupId>

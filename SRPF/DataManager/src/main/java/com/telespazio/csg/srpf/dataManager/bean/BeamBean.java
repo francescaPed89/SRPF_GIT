@@ -377,11 +377,17 @@ public class BeamBean
         this.resTime = resTime;
     }// end method
 
-    @Override
-    public String toString()
-    {
-        return "BeamBean [satName=" + satName + ", beamName=" + beamName + ", nearOffNadir=" + nearOffNadir + ", farOffNadir=" + farOffNadir + ", sensorMode=" + sensorMode + ", sensorModeName=" + sensorModeName + ", isEnabled=" + isEnabled + ", nearOffNadirBeam=" + nearOffNadirBeam + ", farOffNadirBeam=" + farOffNadirBeam + ", swDim1=" + swDim1 + ", swDim2=" + swDim2 + ", isSpotLight=" + isSpotLight + ", idBeam=" + idBeam + ", dtoMinDuration=" + dtoMinDuration + ", dtoMaxDuration=" + dtoMaxDuration + ", resTime=" + resTime + "]";
-    }
+
+
+	@Override
+	public String toString() {
+		return "BeamBean [satName=" + satName + ", beamName=" + beamName + ", nearOffNadir=" + nearOffNadir
+				+ ", farOffNadir=" + farOffNadir + ", sensorMode=" + sensorMode + ", sensorModeName=" + sensorModeName
+				+ ", isEnabled=" + isEnabled + ", nearOffNadirBeam=" + nearOffNadirBeam + ", farOffNadirBeam="
+				+ farOffNadirBeam + ", swDim1=" + swDim1 + ", swDim2=" + swDim2 + ", isSpotLight=" + isSpotLight
+				+ ", idBeam=" + idBeam + ", dtoMinDuration=" + dtoMinDuration + ", dtoMaxDuration=" + dtoMaxDuration
+				+ ", resTime=" + resTime + ", dtoDurationSquared=" + dtoDurationSquared + "]";
+	}
 
 	public int getDtoDurationSquared() {
 		return dtoDurationSquared;
