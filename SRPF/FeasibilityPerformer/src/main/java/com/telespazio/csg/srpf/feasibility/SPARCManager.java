@@ -430,10 +430,11 @@ public class SPARCManager
 	 * @throws FeasibilityException
 	 */
 	private void buildInputFileForFeasibility(double stopValidityTime)
-			throws FileNotFoundException, UnsupportedEncodingException, GridException, ParserConfigurationException,
-			TransformerException, FeasibilityException
+
 
 	{
+		DocumentBuilder db = null;
+		try {
 		this.tracer.log("Building SPARC input for feasibility");
 
 		// building sparc input path
@@ -441,7 +442,11 @@ public class SPARCManager
 																											// java.time.LocalDateTime.now().toString();
 		// creating document
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = dbf.newDocumentBuilder();
+	
+
+				db = dbf.newDocumentBuilder();
+			
+		
 		// new doc
 		Document doc = db.newDocument();
 		// create dto list element
@@ -484,14 +489,29 @@ public class SPARCManager
 				// appending ARID element
 				DTOInfoElement.appendChild(ARIDElement);
 
-				// adding DTO element
-				addDTOToDOMForFeasibility(doc, DTOInfoElement, AzimuthCutElement, dto, stopValidityTime);
+					addDTOToDOMForFeasibility(doc, DTOInfoElement, AzimuthCutElement, dto, stopValidityTime);
+
 			} // end for
 
 			// }//end if
 		} // end for
 
-		dumpXmlDomTreeToFile(doc, fileName);
+			dumpXmlDomTreeToFile(doc, fileName);
+		} catch (TransformerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			System.out.println("TransformerException"+e1);
+		}
+		catch (GridException | FeasibilityException ex) {
+			// TODO Auto-generated catch block
+			ex.printStackTrace();
+			System.out.println("FeasibilityException OR GridException"+ex);
+		}catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("ParserConfigurationException"+e);
+		}
+
 	}// end method
 
 	/**

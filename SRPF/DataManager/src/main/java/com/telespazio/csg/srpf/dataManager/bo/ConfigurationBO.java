@@ -585,6 +585,40 @@ public class ConfigurationBO {
 
 	}// end method
 
+	public void updateDatabaseDAO() throws NamingException, Exception
+
+	{
+		// fill the tables starting from a configuration file
+		// create dao
+		System.out.println("alterTableBeam before  new ConfigurationDao " + new Date());
+		ConfigurationDao dao = new ConfigurationDao();
+		System.out.println("alterTableBeam after  new ConfigurationDao " + new Date());
+
+		try {
+			System.out.println("update database before " + new Date());
+
+			dao.updateDatabase();
+			System.out.println("update database after " + new Date());
+
+		} // end try
+
+		catch (SQLException ex) {
+			// ManagerLogger.logError(this, "Connection error: " + ex);
+			this.tm.critical(EventType.SOFTWARE_EVENT, "Connection error: ", ex.getMessage());
+			// rollback
+			dao.rollback();
+			// rethrow exception
+			throw ex;
+		} // end catch
+		finally {
+			// close transaction
+			dao.closeTransaction();
+			// close connection
+			dao.closeConnection();
+		} // end finally
+
+	}// end method
+	
 	/**
 	 * @author Abed Alissa
 	 * @version 1.0

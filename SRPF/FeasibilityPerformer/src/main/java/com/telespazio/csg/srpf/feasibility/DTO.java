@@ -582,6 +582,7 @@ public class DTO implements Cloneable
      */
     public void setRefinable(boolean isRefinable)
     {
+    	System.out.println("###############################################  setRefinable  "+isRefinable);
         this.isRefinable = isRefinable;
     }// end method
 

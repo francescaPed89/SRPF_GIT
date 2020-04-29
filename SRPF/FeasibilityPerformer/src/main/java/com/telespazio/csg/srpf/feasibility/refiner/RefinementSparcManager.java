@@ -108,6 +108,7 @@ public class RefinementSparcManager extends SPARCManager
         super();
         this.workingDir = workingDir;
         this.sparcMode = sparcMode;
+        
         // schema default
         this.outPutSchema = "/opt/SRPF/SPARC/XML_SCHEMAS/RefinementOutput.xsd";
 
@@ -126,8 +127,11 @@ public class RefinementSparcManager extends SPARCManager
          */
         this.foundDTO = true;
         // initializing
+        System.out.println("initialize refinementSparcManager");
         initialize();
         // building input for sparc
+        System.out.println("do buildInputForRefinement");
+
         buildInputForRefinement();
 
     } // end methods
@@ -157,10 +161,14 @@ public class RefinementSparcManager extends SPARCManager
      * @throws ParserConfigurationException
      * @throws TransformerException
      */
-    private void buildInputForRefinement() throws ParserConfigurationException, TransformerException
+    private void buildInputForRefinement()
     {
-
+    	try
+    	{
+    		
+    
         this.tracer.log("Building SPARC input for Refinement");
+        System.out.println("Building SPARC input for Refinement");
 
         // working dir
         String fileName = this.workingDir + System.getProperty("file.separator") + this.sparcInputFileName;// +
@@ -179,6 +187,7 @@ public class RefinementSparcManager extends SPARCManager
 
         doc.appendChild(DTOList);
 
+        System.out.println("DTOList in buildInputForRefinement :"+DTOList);
         if (this.prArMap == null)
         {
             this.prArMap = new TreeMap<>();
@@ -193,37 +202,59 @@ public class RefinementSparcManager extends SPARCManager
         String currentARID = "";
         String currentDTOID = "";
         // looping on pr
-        for (Map.Entry<String, Map<String, Map<String, DTO>>> armap : this.prArMap.entrySet())
+        System.out.println("--------------------------------------------------------------------------------- ");
+
+        System.out.println("prArMap in buildInputForRefinement :"+prArMap);
+        System.out.println("prArMap in buildInputForRefinement :"+prArMap.size());
+
+        if (this.prArMap.size()>0)
         {
-
-            currentPRID = armap.getKey();
-
-            // Cicle on AR
-            for (Map.Entry<String, Map<String, DTO>> dtoMap : armap.getValue().entrySet())
+            for (Map.Entry<String, Map<String, Map<String, DTO>>> armap : this.prArMap.entrySet())
             {
-                currentARID = dtoMap.getKey();
-                // Cicle on DTO
-                for (Map.Entry<String, DTO> dtoEntry : dtoMap.getValue().entrySet())
+
+                currentPRID = armap.getKey();
+
+                // Cicle on AR
+                for (Map.Entry<String, Map<String, DTO>> dtoMap : armap.getValue().entrySet())
                 {
-                    currentDTOID = dtoEntry.getKey();
-                    currentDto = dtoEntry.getValue();
-                    // XMLUtils.setChildElementText(currentDto.getDtoElement(),
-                    // FeasibilityConstants.SPARCInfoTagName, "Pippo lippo");
-                    // adding DTO element if refinable
-                    if (currentDto.isRefinable())
+                    currentARID = dtoMap.getKey();
+                    // Cicle on DTO
+                    for (Map.Entry<String, DTO> dtoEntry : dtoMap.getValue().entrySet())
                     {
-                        this.foundRefineableDTO = true;
-                        Element DTOElement = doc.createElement(DTOTagName);
-                        DTOList.appendChild(DTOElement);
-                        fillingDTOElement(currentPRID, currentARID, currentDTOID, currentDto, DTOElement, doc);
-                    } // end if
+                        currentDTOID = dtoEntry.getKey();
+                        currentDto = dtoEntry.getValue();
+                        System.out.println("currentDto in buildInputForRefinement :"+currentDto);
 
+                        // XMLUtils.setChildElementText(currentDto.getDtoElement(),
+                        // FeasibilityConstants.SPARCInfoTagName, "Pippo lippo");
+                        // adding DTO element if refinable
+                        if (currentDto.isRefinable())
+                        {
+                            System.out.println("refinable!");
+
+                            this.foundRefineableDTO = true;
+                            Element DTOElement = doc.createElement(DTOTagName);
+                            DTOList.appendChild(DTOElement);
+                            fillingDTOElement(currentPRID, currentARID, currentDTOID, currentDto, DTOElement, doc);
+                        } // end if
+                        else
+                        {
+                            System.out.println("not refinable!");
+                        }
+                    } // end for
                 } // end for
-            } // end for
 
-        } // end for
+            } // end for
+        }
+
           // dumping on file
         dumpXmlDomTreeToFile(doc, fileName);
+    	}
+ 		catch (ParserConfigurationException | TransformerException e) {
+ 			// TODO Auto-generated catch block
+ 			e.printStackTrace();
+ 			System.out.println("ParserConfigurationException OR TransformerException"+e);
+ 		}
     }// end Methods
 
     /**
@@ -668,7 +699,7 @@ public class RefinementSparcManager extends SPARCManager
     {
 
         NodeList sampleList = dtoElement.getElementsByTagName(SampleTagName);
-
+        System.out.println("sampleList "+sampleList);
         int numberOfAzimuthSample = sampleList.getLength();
         // two cut in case of refine
         if ((numberOfAzimuthSample != 2) && (numberOfAzimuthSample != 0))
@@ -681,6 +712,8 @@ public class RefinementSparcManager extends SPARCManager
         // not cut no refinable
         if (numberOfAzimuthSample == 0)
         {
+        	System.out.println("###############################################  updateCurrentDTOWithRefinementoutputDTOElement  ");
+
             dto.setRefinable(false);
         } // end if
         else

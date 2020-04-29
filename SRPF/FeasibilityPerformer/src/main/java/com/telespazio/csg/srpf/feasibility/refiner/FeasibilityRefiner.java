@@ -475,8 +475,7 @@ public class FeasibilityRefiner
 
         try
         {
-            // retrieve paws
-            satellitePawMap = bo.getPaws(this.minStartTime, this.minStartTime);
+
             String currentPRId;
             String currentARId;
             String currentDTOId;
@@ -497,20 +496,28 @@ public class FeasibilityRefiner
                     {
                         currentDTO = dtoEntry.getValue();
                         currentDTOId = currentDTO.getId();
-
-                        pawList = satellitePawMap.get(currentDTO.getSat().getName());
-                        Satellite sat = currentDTO.getSat();
-                        sat.setPawList(pawList);
                         
-                        //get all paws in overlap with the current dto 
+//                        int satId = currentDTO.getSat().getSatID();
+//                        System.out.println("dto id :"+currentDTOId + " is referred to sat name "+currentDTO.getSatName()+" with id :"+satId);
+//                        satellitePawMap = bo.getPawsNewMethod(satId,currentDTO.getStartTime(), currentDTO.getStopTime());
+
+                        // retrieve paws
                         satellitePawMap = bo.getPaws(currentDTO.getStartTime(), currentDTO.getStopTime());
                         pawList = satellitePawMap.get(currentDTO.getSat().getName());
+                        Satellite sat = currentDTO.getSat();
+                      //  sat.setPawList(pawList);
+                        
+                        //get all paws in overlap with the current dto 
+                      //  satellitePawMap = bo.getPaws(currentDTO.getStartTime(), currentDTO.getStopTime());
+                  //      pawList = satellitePawMap.get(currentDTO.getSat().getName());
 
                         logger.debug("23012020 for dto : "+currentDTO);
 
                         logger.debug("23012020 all paws in overlap with the current dto : "+pawList);
                         if (currentDTO.isRefinable() && sat.checkIfDTOFallsInsideNotDeferreableCheckWithPAW(currentDTO, pawList))
                         {
+                        	System.out.println("###############################################  from check for paw  ");
+
                             // not refinable
                             currentDTO.setRefinable(false);
                             this.tracer.information(EventType.LOG_EVENT, ProbableCause.INFORMATION_INFO, "During Refinement the DTO: " + currentDTOId + " of AR " + currentARId + " of PR " + currentPRId + " has been set not refineable beacause of not derefferable PAW");
@@ -735,6 +742,8 @@ public class FeasibilityRefiner
 
         if ((startTime != 0) && (stopTime != 0) && ((stopTime - startTime) > 0))
         {
+        	System.out.println("###############################################  evaluate dto times  ");
+
             // the dto could be refined
             dto.setRefinable(true);
             // Set the new trackNumner

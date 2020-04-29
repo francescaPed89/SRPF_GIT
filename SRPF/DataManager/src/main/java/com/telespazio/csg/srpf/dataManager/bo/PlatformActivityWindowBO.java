@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -416,8 +417,6 @@ public class PlatformActivityWindowBO {
 		
 		try {
 
-			Logger logger = LogManager.getLogger(PlatformActivityWindowBO.class.getName());
-
 			dao = new PlatformActivityWindowDAO();
 			//System.out.println("PlatformActivityWindowBO" + ": Inside method updatePaw ");
 
@@ -658,5 +657,41 @@ public class PlatformActivityWindowBO {
 		return success;
 
 	}// end method
+
+	public List<PlatformActivityWindowBean> getPawsNewMethod(int satId, double startTime,
+			double stopTime) {
+		// map to be returned
+		List<PlatformActivityWindowBean> pawList = new ArrayList<PlatformActivityWindowBean>();
+				PlatformActivityWindowDAO dao = null;
+
+				try {
+					dao = new PlatformActivityWindowDAO();
+
+					// ManagerLogger.logInfo(this, ": Inside method selectPawData ");
+					this.tm.debug("Inside method getPaws ");
+					pawList = dao.getPawsList(satId,startTime, stopTime);
+
+				} // end try
+				catch (Exception e) {
+					// log error
+					this.tm.critical(EventType.SOFTWARE_EVENT, "Error selected Epochs ", e.getMessage());
+					// rethrow
+					try {
+						throw e;
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				} // end catch
+				finally {
+					// close connection if not null
+					if (dao != null) {
+						dao.closeConnection();
+					}
+				} // end finally
+
+				// return map
+				return pawList;
+	}
 
 }// end class

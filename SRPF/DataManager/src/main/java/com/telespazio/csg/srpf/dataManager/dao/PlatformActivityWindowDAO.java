@@ -36,6 +36,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
@@ -99,10 +100,9 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		try {
 			int satId = getIdSatellite(satName);
 			// delete string
-			if(con==null || con.isClosed())
-		{
-			con = super.initConnection();
-		}
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
 			String deleteString = "delete from GSIF_PAW where ACTIVITY_ID=" + activityId + " and SATELLITE=" + satId;
 			this.con.setAutoCommit(false);
 			deleteStatement = this.con.createStatement();
@@ -166,10 +166,9 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 			deleteString = deleteString + " AND SATELLITE in "
 					+ "(SELECT SATELLITE.ID_SATELLITE from SATELLITE join MISSION on SATELLITE.MISSION=MISSION.ID_MISSION AND MISSION.MISSION_NAME='"
 					+ mission + "')";
-			if(con==null || con.isClosed())
-		{
-			con = super.initConnection();
-		}
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
 			// no autocommit
 			this.con.setAutoCommit(false);
 			// executing
@@ -211,33 +210,27 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 			double activityStopTime, boolean deferrableFlag) throws NamingException, Exception
 
 	{
-		//System.out.println("show connection status "+this.con.toString());
-		if(con==null || con.isClosed())
-	{
-		con = super.initConnection();
-	}
-		// autocommit false
-		this.con.setAutoCommit(false);
-		//System.out.println("inside PlatformActivityWindowDAO.uploadPaw");
-		int satId = 0;
-		int missionId = 0;
 
-		PlatformActivityWindowBean pawbean = null;
-		pawbean = new PlatformActivityWindowBean();
+		// System.out.println("inside PlatformActivityWindowDAO.uploadPaw");
+		int satId = 0;
 		// satName = tokens.nextToken().toString();
 		// prepared stm
-		//System.out.println("Sat Name: " + satelliteName);
+		// System.out.println("Sat Name: " + satelliteName);
 		PreparedStatement insertStatement = null;
 
 		try
 
 		{
 			satId = getIdSatellite(satelliteName);
+			// System.out.println("show connection status "+this.con.toString());
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
 			// autocommit false
-			this.con.setAutoCommit(false);
+			con.setAutoCommit(false);
 			// building statement
 			insertStatement = this.con.prepareStatement(PawInsertQuery);
-			//System.out.println("trying to insert data into DB " + PawInsertQuery);
+			// System.out.println("trying to insert data into DB " + PawInsertQuery);
 			// inserting values
 			insertStatement.setInt(1, satId);
 			insertStatement.setString(2, activityType);
@@ -263,7 +256,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 
 		{
 			// rollback
-			this.con.rollback();
+			con.rollback();
 			// close stm
 			closeStatement(insertStatement);
 
@@ -275,7 +268,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 			con.close();
 		} // end finally
 
-		//System.out.println("Data inserted");
+		// System.out.println("Data inserted");
 	}// end method
 
 	/**
@@ -293,10 +286,9 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		int idSatellite = 0;
 		// query string
 		String query = "SELECT ID_SATELLITE  from SATELLITE where   SATELLITE_NAME = " + "'" + satelliteName + "'";
-		if(con==null || con.isClosed())
-	{
-		con = super.initConnection();
-	}
+		if (con == null || con.isClosed()) {
+			con = super.initConnection();
+		}
 		PreparedStatement st = this.con.prepareStatement(query);
 		ResultSet rs = null;
 		try {
@@ -350,10 +342,8 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 	public ArrayList<PlatformActivityWindowBean> selectPawDataAll(int idSatellite, double initialEpoch,
 			double finalEpoch) throws Exception {
 
-		//francescapedrola : questo metodo non viene mai invocato!!!!!!!!!!!! 
-		
-		
-		
+		// francescapedrola : questo metodo non viene mai invocato!!!!!!!!!!!!
+
 		// String query = "SELECT SATELLITE, SATELLITE_NAME, ACTIVITY_TYPE,
 		// ACTIVITY_ID, ACTIVITY_START_TIME, ACTIVITY_STOP_TIME, DEFERRABLE_FLAG
 		// FROM GSIF_PAW gp, SATELLITE s "
@@ -368,12 +358,13 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		PlatformActivityWindowDAO.logger.debug(" selectPawDataAll:  " + query);
 		PlatformActivityWindowDAO.logger.debug(" with initial epoch:  " + initialEpoch);
 		PlatformActivityWindowDAO.logger.debug(" and final epoch :  " + finalEpoch);
-		PlatformActivityWindowDAO.logger.debug(" with initial epoch DATE:  " + DateUtils.fromCSKDateToDateTime(initialEpoch));
-		PlatformActivityWindowDAO.logger.debug(" and final epoch DATE:  " + DateUtils.fromCSKDateToDateTime(finalEpoch));
-		if(con==null || con.isClosed())
-	{
-		con = super.initConnection();
-	}
+		PlatformActivityWindowDAO.logger
+				.debug(" with initial epoch DATE:  " + DateUtils.fromCSKDateToDateTime(initialEpoch));
+		PlatformActivityWindowDAO.logger
+				.debug(" and final epoch DATE:  " + DateUtils.fromCSKDateToDateTime(finalEpoch));
+		if (con == null || con.isClosed()) {
+			con = super.initConnection();
+		}
 		this.con.setAutoCommit(false);
 
 		PreparedStatement st = this.con.prepareStatement(query);
@@ -396,31 +387,28 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 				pawData.setActivityType(rs.getString(3));
 				pawData.setActivityId(rs.getLong(4));
 				pawData.setActivityStartTime(rs.getDouble(5));
-				PlatformActivityWindowDAO.logger.debug(" for paw :  "+pawData);
+				PlatformActivityWindowDAO.logger.debug(" for paw :  " + pawData);
 
 				pawData.setActivityStopTime(rs.getDouble(6));
-				PlatformActivityWindowDAO.logger.debug(" for paw startTime :  "+pawData.getActivityStartTime());
-				PlatformActivityWindowDAO.logger.debug(" for paw startTime as Date :  "+DateUtils.fromCSKDateToDateTime(pawData.getActivityStartTime()));
+				PlatformActivityWindowDAO.logger.debug(" for paw startTime :  " + pawData.getActivityStartTime());
+				PlatformActivityWindowDAO.logger.debug(" for paw startTime as Date :  "
+						+ DateUtils.fromCSKDateToDateTime(pawData.getActivityStartTime()));
 
-				PlatformActivityWindowDAO.logger.debug(" for paw stopTime :  "+pawData.getActivityStopTime());
-				PlatformActivityWindowDAO.logger.debug(" for paw stopTime as Date :  "+DateUtils.fromCSKDateToDateTime(pawData.getActivityStopTime()));
+				PlatformActivityWindowDAO.logger.debug(" for paw stopTime :  " + pawData.getActivityStopTime());
+				PlatformActivityWindowDAO.logger.debug(" for paw stopTime as Date :  "
+						+ DateUtils.fromCSKDateToDateTime(pawData.getActivityStopTime()));
 
-				if(pawData.getActivityStartTime()<initialEpoch && pawData.getActivityStopTime()>finalEpoch)
-				{
+				if (pawData.getActivityStartTime() < initialEpoch && pawData.getActivityStopTime() > finalEpoch) {
 					PlatformActivityWindowDAO.logger.debug(" visibility period totally included inside the paw ");
 
-				}
-				else if(pawData.getActivityStopTime()>finalEpoch && pawData.getActivityStartTime()>initialEpoch )
-				{
+				} else if (pawData.getActivityStopTime() > finalEpoch
+						&& pawData.getActivityStartTime() > initialEpoch) {
 					PlatformActivityWindowDAO.logger.debug(" paw overlap partially in stop ");
-				}
-				else if(pawData.getActivityStartTime()>=initialEpoch && pawData.getActivityStopTime()<=finalEpoch )
-				{
+				} else if (pawData.getActivityStartTime() >= initialEpoch
+						&& pawData.getActivityStopTime() <= finalEpoch) {
 					PlatformActivityWindowDAO.logger.debug(" paw totally included inside the visibility period");
 
-				}
-				else
-				{
+				} else {
 					PlatformActivityWindowDAO.logger.debug(" paw overlap partially in start ");
 				}
 				PlatformActivityWindowDAO.logger.debug(" added pawData:  " + pawData);
@@ -471,14 +459,19 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		Map<String, ArrayList<PlatformActivityWindowBean>> pawMap = new TreeMap<>();
 
 		// maxy query
-		
+
 		/*
-		 * 		String query = "SELECT SATELLITE.ID_SATELLITE, SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_TYPE, "
-				+ "GSIF_PAW.ACTIVITY_ID, GSIF_PAW.ACTIVITY_START_TIME, GSIF_PAW.ACTIVITY_STOP_TIME, GSIF_PAW.DEFERRABLE_FLAG "
-				+ " from GSIF_PAW inner join SATELLITE on GSIF_PAW.SATELLITE = SATELLITE.ID_SATELLITE where "
-				+ " (GSIF_PAW.ACTIVITY_START_TIME <= " + start + " and GSIF_PAW.ACTIVITY_STOP_TIME >=" + stop + ") OR"
-				+ " (GSIF_PAW.ACTIVITY_START_TIME >= " + start + " and GSIF_PAW.ACTIVITY_START_TIME <=" + stop + ")"
-				+ " order by SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_START_TIME  ";
+		 * String query =
+		 * "SELECT SATELLITE.ID_SATELLITE, SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_TYPE, "
+		 * +
+		 * "GSIF_PAW.ACTIVITY_ID, GSIF_PAW.ACTIVITY_START_TIME, GSIF_PAW.ACTIVITY_STOP_TIME, GSIF_PAW.DEFERRABLE_FLAG "
+		 * +
+		 * " from GSIF_PAW inner join SATELLITE on GSIF_PAW.SATELLITE = SATELLITE.ID_SATELLITE where "
+		 * + " (GSIF_PAW.ACTIVITY_START_TIME <= " + start +
+		 * " and GSIF_PAW.ACTIVITY_STOP_TIME >=" + stop + ") OR" +
+		 * " (GSIF_PAW.ACTIVITY_START_TIME >= " + start +
+		 * " and GSIF_PAW.ACTIVITY_START_TIME <=" + stop + ")" +
+		 * " order by SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_START_TIME  ";
 		 * 
 		 * 
 		 */
@@ -492,19 +485,16 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		PlatformActivityWindowDAO.logger.debug(" with initial epoch:  " + DateUtils.fromCSKDateToDateTime(start));
 		PlatformActivityWindowDAO.logger.debug(" and final epoch :  " + DateUtils.fromCSKDateToDateTime(stop));
 
-		
 		PreparedStatement st = null;
 		ResultSet rs = null;
 
-		String currentSatelliteName = "";
 		String newSatelliteName = "";
 		PlatformActivityWindowBean pawData;
 
 		ArrayList<PlatformActivityWindowBean> currentSatellitePawList = new ArrayList<>();
 
 		try {
-			if(con==null || con.isClosed())
-			{
+			if (con == null || con.isClosed()) {
 				con = super.initConnection();
 			}
 			st = this.con.prepareStatement(query);
@@ -515,11 +505,6 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 			while (rs.next()) {
 				// retrieve info on paw
 				newSatelliteName = rs.getString(2);
-				if (!currentSatelliteName.equals(newSatelliteName)) {
-					currentSatellitePawList = new ArrayList<>();
-					currentSatelliteName = newSatelliteName;
-					pawMap.put(currentSatelliteName, currentSatellitePawList);
-				} // end if
 
 				pawData = new PlatformActivityWindowBean();
 
@@ -537,58 +522,37 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 				else {
 					pawData.setDeferrableFlag(false);
 				} // end else
-				PlatformActivityWindowDAO.logger.debug("for paw :  "+pawData);
+				PlatformActivityWindowDAO.logger.debug("for paw :  " + pawData);
 
-				PlatformActivityWindowDAO.logger.debug(" for paw startTime :  "+pawData.getActivityStartTime());
-				PlatformActivityWindowDAO.logger.debug(" for paw startTime as Date :  "+DateUtils.fromCSKDateToDateTime(pawData.getActivityStartTime()));
+				PlatformActivityWindowDAO.logger.debug(" for paw startTime :  " + pawData.getActivityStartTime());
+				PlatformActivityWindowDAO.logger.debug(" for paw startTime as Date :  "
+						+ DateUtils.fromCSKDateToDateTime(pawData.getActivityStartTime()));
 
-				PlatformActivityWindowDAO.logger.debug(" for paw stopTime :  "+pawData.getActivityStopTime());
-				PlatformActivityWindowDAO.logger.debug(" for paw stopTime as Date :  "+DateUtils.fromCSKDateToDateTime(pawData.getActivityStopTime()));
+				PlatformActivityWindowDAO.logger.debug(" for paw stopTime :  " + pawData.getActivityStopTime());
+				PlatformActivityWindowDAO.logger.debug(" for paw stopTime as Date :  "
+						+ DateUtils.fromCSKDateToDateTime(pawData.getActivityStopTime()));
 
-				if(pawData.getActivityStartTime()<start && pawData.getActivityStopTime()>stop)
-				{
+				if (pawData.getActivityStartTime() < start && pawData.getActivityStopTime() > stop) {
 					PlatformActivityWindowDAO.logger.debug(" visibility period totally included inside the paw ");
 
-				}
-				else if(pawData.getActivityStopTime()>stop && pawData.getActivityStartTime()>start )
-				{
+				} else if (pawData.getActivityStopTime() > stop && pawData.getActivityStartTime() > start) {
 					PlatformActivityWindowDAO.logger.debug(" paw overlap partially in stop ");
-				}
-				else if(pawData.getActivityStartTime()>=start && pawData.getActivityStopTime()<=stop )
-				{
+				} else if (pawData.getActivityStartTime() >= start && pawData.getActivityStopTime() <= stop) {
 					PlatformActivityWindowDAO.logger.debug(" paw totally included inside the visibility period");
 
-				}
-				else
-				{
+				} else {
 					PlatformActivityWindowDAO.logger.debug(" paw overlap partially in start ");
 				}
-				
-				
-				/*
-				 * 
-				 * 				if(pawData.getActivityStartTime()<start)
-				{
-					PlatformActivityWindowDAO.logger.debug(" paw overlap partially in start ");
-				}
-				else if(pawData.getActivityStopTime()>stop)
-				{
-					PlatformActivityWindowDAO.logger.debug(" paw overlap partially in stop ");
-				}
-				else if(pawData.getActivityStartTime()>=start && pawData.getActivityStopTime()<=stop )
-				{
-					PlatformActivityWindowDAO.logger.debug(" paw totally included inside the visibility period");
 
+				if (pawMap.get(newSatelliteName) != null) {
+					pawMap.get(newSatelliteName).add(pawData);
+				} else {
+					currentSatellitePawList.add(pawData);
+					pawMap.put(newSatelliteName, currentSatellitePawList);
 				}
-				else
-				{
-					PlatformActivityWindowDAO.logger.debug(" visibility period totally included inside the paw ");
-				}
-				 * 
-				 */
-
-					
-				currentSatellitePawList.add(pawData);
+//					currentSatelliteName = newSatelliteName;
+//					pawMap.put(currentSatelliteName, currentSatellitePawList);
+//					currentSatellitePawList = new ArrayList<>();
 			}
 		} // end try
 		catch (Exception e) {
@@ -620,13 +584,12 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 	 * @version 1.0
 	 * @date
 	 * @param finalEpoch
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void deletePawData(double finalEpoch) throws Exception {
-		if(con==null || con.isClosed())
-	{
-		con = super.initConnection();
-	}
+		if (con == null || con.isClosed()) {
+			con = super.initConnection();
+		}
 		StringBuffer sql = new StringBuffer();
 		sql.append("DELETE FROM GSIF_PAW");
 		sql.append(" WHERE");
@@ -653,5 +616,129 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 			con.close();
 		} // end finally
 	}// end method
+
+	public List<PlatformActivityWindowBean> getPawsList(int satId, double start, double stop) {
+		// map to be returned
+		List<PlatformActivityWindowBean> pawList = new ArrayList<PlatformActivityWindowBean>();
+
+				// maxy query
+
+				/*
+				 * String query =
+				 * "SELECT SATELLITE.ID_SATELLITE, SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_TYPE, "
+				 * +
+				 * "GSIF_PAW.ACTIVITY_ID, GSIF_PAW.ACTIVITY_START_TIME, GSIF_PAW.ACTIVITY_STOP_TIME, GSIF_PAW.DEFERRABLE_FLAG "
+				 * +
+				 * " from GSIF_PAW inner join SATELLITE on GSIF_PAW.SATELLITE = SATELLITE.ID_SATELLITE where "
+				 * + " (GSIF_PAW.ACTIVITY_START_TIME <= " + start +
+				 * " and GSIF_PAW.ACTIVITY_STOP_TIME >=" + stop + ") OR" +
+				 * " (GSIF_PAW.ACTIVITY_START_TIME >= " + start +
+				 * " and GSIF_PAW.ACTIVITY_START_TIME <=" + stop + ")" +
+				 * " order by SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_START_TIME  ";
+				 * 
+				 * 
+				 */
+				String query = "SELECT SATELLITE.ID_SATELLITE, SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_TYPE, "
+						+ "GSIF_PAW.ACTIVITY_ID, GSIF_PAW.ACTIVITY_START_TIME, GSIF_PAW.ACTIVITY_STOP_TIME, GSIF_PAW.DEFERRABLE_FLAG "
+						+ " from GSIF_PAW inner join SATELLITE on GSIF_PAW.SATELLITE = SATELLITE.ID_SATELLITE where "
+						+ " (GSIF_PAW.ACTIVITY_START_TIME <= " + stop + " and GSIF_PAW.ACTIVITY_STOP_TIME >=" + start + ")"
+						+ " order by SATELLITE.SATELLITE_NAME, GSIF_PAW.ACTIVITY_START_TIME  ";
+
+				PlatformActivityWindowDAO.logger.debug(" getPaws:  " + query);
+				PlatformActivityWindowDAO.logger.debug(" with initial epoch:  " + DateUtils.fromCSKDateToDateTime(start));
+				PlatformActivityWindowDAO.logger.debug(" and final epoch :  " + DateUtils.fromCSKDateToDateTime(stop));
+
+				PreparedStatement st = null;
+				ResultSet rs = null;
+
+				String newSatelliteName = "";
+				PlatformActivityWindowBean pawData;
+
+				ArrayList<PlatformActivityWindowBean> currentSatellitePawList = new ArrayList<>();
+
+				try {
+					if (con == null || con.isClosed()) {
+						con = super.initConnection();
+					}
+					st = this.con.prepareStatement(query);
+					// exeuting query
+					rs = st.executeQuery();
+
+					// for each row in result set
+					while (rs.next()) {
+						// retrieve info on paw
+						newSatelliteName = rs.getString(2);
+
+						pawData = new PlatformActivityWindowBean();
+
+						pawData.setSatId(rs.getInt(1));
+						pawData.setSatName(rs.getString(2));
+
+						pawData.setActivityType(rs.getString(3));
+						pawData.setActivityId(rs.getLong(4));
+						pawData.setActivityStartTime(rs.getDouble(5));
+						pawData.setActivityStopTime(rs.getDouble(6));
+						// check if dererreable
+						if (rs.getInt(7) == DataManagerConstants.DEFERRABLE_FLAG_TRUE) {
+							pawData.setDeferrableFlag(true);
+						} // end if
+						else {
+							pawData.setDeferrableFlag(false);
+						} // end else
+						PlatformActivityWindowDAO.logger.debug("for paw :  " + pawData);
+
+						PlatformActivityWindowDAO.logger.debug(" for paw startTime :  " + pawData.getActivityStartTime());
+						PlatformActivityWindowDAO.logger.debug(" for paw startTime as Date :  "
+								+ DateUtils.fromCSKDateToDateTime(pawData.getActivityStartTime()));
+
+						PlatformActivityWindowDAO.logger.debug(" for paw stopTime :  " + pawData.getActivityStopTime());
+						PlatformActivityWindowDAO.logger.debug(" for paw stopTime as Date :  "
+								+ DateUtils.fromCSKDateToDateTime(pawData.getActivityStopTime()));
+
+						if (pawData.getActivityStartTime() < start && pawData.getActivityStopTime() > stop) {
+							PlatformActivityWindowDAO.logger.debug(" visibility period totally included inside the paw ");
+
+						} else if (pawData.getActivityStopTime() > stop && pawData.getActivityStartTime() > start) {
+							PlatformActivityWindowDAO.logger.debug(" paw overlap partially in stop ");
+						} else if (pawData.getActivityStartTime() >= start && pawData.getActivityStopTime() <= stop) {
+							PlatformActivityWindowDAO.logger.debug(" paw totally included inside the visibility period");
+
+						} else {
+							PlatformActivityWindowDAO.logger.debug(" paw overlap partially in start ");
+						}
+
+							pawList.add(pawData);
+						}
+				} // end try
+				catch (Exception e) {
+					this.tm.critical(EventType.SOFTWARE_EVENT, "Errore in SELECT from GSIF PAW: ", e.getMessage());
+					// rethrow
+					try {
+						throw e;
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				} // end catch
+				finally {
+					try {
+					// close rs set
+					// close stm
+					if (rs != null) {
+					
+							rs.close();
+
+					}
+					st.close();
+					con.close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} // end finally
+					// return map
+				return pawList;
+	}
 
 }// end class

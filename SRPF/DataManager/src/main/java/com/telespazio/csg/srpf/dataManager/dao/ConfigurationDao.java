@@ -37,6 +37,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -175,7 +176,6 @@ public class ConfigurationDao extends GenericDAO {
 			// execute query
 			this.tm.debug(query);
 			if (con == null || con.isClosed()) {
-				System.out.println("connection was closed!");
 				con = super.initConnection();
 			}
 			st = con.prepareStatement(query);
@@ -356,7 +356,6 @@ public class ConfigurationDao extends GenericDAO {
 		Statement deleteStatement = null;
 
 		try {
-
 
 			// list of table to be deleted
 			String[] tables = { "SATELLITE_PASS", "GSIF_PAW", "OBDATA_FILES", "SAT_BEAM_ASSOCIATION", "BEAM",
@@ -976,14 +975,22 @@ public class ConfigurationDao extends GenericDAO {
 					sensorModeNames = line.split("\\" + cvsSplitBy);
 
 					if (sensorModeNames.length > 10) {
-					
+						System.out.println("reading line :" + line);
+
 						// extract sensormode
 						String sensorModeName = sensorModeNames[1].trim();
+						
+						String satelliteName = sensorModeNames[2].trim();
+
 						// extract beam
 						String beamName = sensorModeNames[8].trim();
 
 						// get sensormode id
 						int idSensorMode = getIdSensorMode(sensorModeName);
+						String isSpotlight = sensorModeNames[14].trim();
+						if (idSensorMode < 0) {
+							idSensorMode = insertSensorMode(sensorModeName, isSpotlight);
+						}
 						while (!allBeams.contains(beamName)) {
 							i++;
 							// getting angles
@@ -1020,21 +1027,23 @@ public class ConfigurationDao extends GenericDAO {
 									continue;
 								}
 							}
-
+							boolean insert = false;
 							BeamBean dummyBean = createBeam(i, beamName, nearOffNadir, farOffNadir, idSensorMode,
 									isEnabled, swDim1, swDim2, dtoMinDuration, dtoMaxDuration, resTime,
 									dtoDurationSquared);
-							
-							System.out.println(" create a dummy beam for element "+dummyBean);
+
+							System.out.println(" create a dummy beam for element " + dummyBean);
 
 							BeamBean existBeam = existBeam(allBeamsList, dummyBean);
-							System.out.println(" check if exist another beam with same beam name and same beamId -> returned : "+existBeam);
-
+							System.out.println(
+									" check if exist another beam with same beam name and same beamId -> returned : "
+											+ existBeam);
+							int beamId= -1;
 							if (existBeam != null) {
 								// Beam exist, check if there is something different
 								boolean isChanged = checkIfIsDifferent(existBeam.toString(), dummyBean.toString());
-								
-								System.out.println("Check if there are changes between these beams -> "+isChanged);
+
+								System.out.println("Check if there are changes between these beams -> " + isChanged);
 								if (isChanged) {
 									// update it
 									System.out.println("go in update!");
@@ -1046,41 +1055,83 @@ public class ConfigurationDao extends GenericDAO {
 											+ swDim1 + "" + ",SW_DIM2 = " + swDim2 + "" + ",DTO_MIN_DURATION ="
 											+ dtoMinDuration + "" + ",DTO_MAX_DURATION = " + dtoMaxDuration + ""
 											+ ",RES_TIME = " + resTime + "" + ",DTO_DURATION_SQUARED = "
-											+ dtoDurationSquared + "" + " WHERE ID_BEAM = " + i + " AND BEAM_NAME = "
-											+ "'" + beamName + "'";
-
+											+ dtoDurationSquared + "" + " WHERE BEAM_NAME = " + "'" + beamName + "'";
+									beamId = existBeam.getIdBeam();
 								} else {
 									// nothing to do
-								System.out.println("nothing to do");
+									System.out.println("nothing to do");
 								}
 
 							} else {
 								// beam doesn't exist, add it !
-							System.out.println("go in insert!");
+								int maxId = 1000;
+								query = "SELECT MAX (ID_BEAM) AS MAX_ID FROM BEAM";
+								System.out.println("query " + query);
+
+								try {
+									con = checkConn();
+									PreparedStatement st = con.prepareStatement(query);
+									ResultSet rs = st.executeQuery();
+									System.out.println("rs " + rs);
+
+									if (rs.next()) {
+										maxId = rs.getInt("MAX_ID") + 1;
+									}
+
+									// close result set
+									if (rs != null) {
+										rs.close();
+									}
+									// close statement
+									st.close();
+								} catch (SQLException e)
+
+								{
+									this.tm.critical(EventType.SOFTWARE_EVENT, "Error import csv to BEAM table: ",
+											e.getMessage());
+
+								}
+								beamId = maxId;
+								System.out.println("maxId " + maxId);
+
+								System.out.println("go in insert!");
+
+								insert = true;
 								query = "INSERT into BEAM (" + "ID_BEAM, " + "BEAM_NAME," + "NEAR_OFF_NADIR,"
 										+ "FAR_OFF_NADIR, " + "SENSOR_MODE," + "IS_ENABLED," + "SW_DIM1," + "SW_DIM2,"
 										+ "DTO_MIN_DURATION," + "DTO_MAX_DURATION, " + "RES_TIME, "
-										+ "DTO_DURATION_SQUARED) " + "" + " VALUES (" + i + ",'" + beamName + "',"
+										+ "DTO_DURATION_SQUARED) " + "" + " VALUES (" + maxId + ",'" + beamName + "',"
 										+ nearOffNadir + "," + farOffNadir + "," + idSensorMode + "," + isEnabled + ","
 										+ swDim1 + "," + swDim2 + "," + dtoMinDuration + "," + dtoMaxDuration + ","
 										+ resTime + "," + dtoDurationSquared + ")";
 
 							}
-							System.out.println("PRINT QUERY :" + query);
 							if (query != null) {
-								
+								System.out.println("PRINT QUERY :" + query);
+
 								if (con == null || con.isClosed()) {
 									con = super.initConnection();
 								}
 								// set autocommit to false
 								con.setAutoCommit(false);
-								
+
 								// //System.out.println(uploadBeam);
 								pstm = con.prepareStatement(query);
 								// executing query
 								pstm.execute();
 
 								pstm.close();
+								
+								
+								if(insert)
+								{
+									System.out.println("insert also in satBeam assoc!");
+									int satId = getIdSatellite(satelliteName);
+									
+									insertSatBeamAssoc(satId, beamId);
+//							        SATELLITE NUMBER(10),
+//							        BEAM NUMBER(11),
+								}
 							}
 							if (!allBeams.contains(beamName)) {
 								allBeams.add(beamName);
@@ -1112,6 +1163,137 @@ public class ConfigurationDao extends GenericDAO {
 		} // end finally
 	}// end method
 
+	private int insertSensorMode(String sensorModeName, String isSpotlightAsString) throws Exception {
+		int isSpotlight = 0;
+		if (isSpotlightAsString.equalsIgnoreCase("Yes")) {
+			isSpotlight = 1;
+		} else {
+			isSpotlight = 0;
+		} // end if
+		PreparedStatement st = null;
+
+		// beam doesn't exist, add it !
+		int maxId = 1000;
+		String query = "SELECT MAX (ID_SENSOR_MODE) AS MAX_ID FROM SENSOR_MODE";
+		System.out.println("query " + query);
+
+		try {
+			con = checkConn();
+			st = con.prepareStatement(query);
+			ResultSet rs = st.executeQuery();
+			System.out.println("rs " + rs);
+
+			if (rs.next()) {
+				maxId = rs.getInt("MAX_ID") + 1;
+			}
+
+			// close result set
+			if (rs != null) {
+				rs.close();
+			}
+			// close statement
+			st.close();
+
+			// Integer.parseInt(sensorModeNames[16].trim());
+			// query string
+			String uploadSensorMode = "INSERT into SENSOR_MODE (ID_SENSOR_MODE, SENSOR_MODE_NAME,IS_SPOT_LIGHT) VALUES ('"
+					+ maxId + "','" + sensorModeName + "'" + "," + isSpotlight + " )";
+
+			con = checkConn();
+			con.setAutoCommit(false);
+
+			st = con.prepareStatement(uploadSensorMode);
+			// executing query
+			st.execute();
+
+			// closing
+			st.close();
+			st = null;
+
+		} catch (Exception ex)
+
+		{
+		// rethrow
+		this.tm.critical(EventType.SOFTWARE_EVENT, "Error import csv to BEAM table: ", ex.getMessage());
+		throw ex;
+	} // end catch
+	finally {
+		// clse statement
+		if (st != null) {
+			st.close();
+		}
+		con.close();
+	} // end finally
+		
+		return maxId;
+	}
+
+	private int insertSatBeamAssoc(int satId, int beamId) throws Exception {
+		PreparedStatement st = null;
+
+		// beam doesn't exist, add it !
+		int maxId = 1000;
+		String query = "SELECT MAX (ID_BEAM_ASSOCIATION) AS MAX_ID FROM SAT_BEAM_ASSOCIATION";
+		System.out.println("query " + query);
+
+		try {
+			con = checkConn();
+			st = con.prepareStatement(query);
+			ResultSet rs = st.executeQuery();
+			System.out.println("rs " + rs);
+
+			if (rs.next()) {
+				maxId = rs.getInt("MAX_ID") + 1;
+			}
+
+			// close result set
+			if (rs != null) {
+				rs.close();
+			}
+			// close statement
+			st.close();
+
+			// Integer.parseInt(sensorModeNames[16].trim());
+			// query string
+			
+			/*
+			 * 
+			 *         ID_BEAM_ASSOCIATION NUMBER(11) NOT NULL,
+        SATELLITE NUMBER(10),
+        BEAM NUMBER(11),
+		
+			 */
+			String uploadSensorMode = "INSERT into SAT_BEAM_ASSOCIATION (ID_BEAM_ASSOCIATION, SATELLITE,BEAM) VALUES ('"
+					+ maxId + "','" + satId + "'" + "," + beamId + " )";
+
+			con = checkConn();
+			con.setAutoCommit(false);
+
+			st = con.prepareStatement(uploadSensorMode);
+			// executing query
+			st.execute();
+
+			// closing
+			st.close();
+			st = null;
+
+		} catch (Exception ex)
+
+		{
+		// rethrow
+		this.tm.critical(EventType.SOFTWARE_EVENT, "Error import csv to BEAM table: ", ex.getMessage());
+		throw ex;
+	} // end catch
+	finally {
+		// clse statement
+		if (st != null) {
+			st.close();
+		}
+		con.close();
+	} // end finally
+		
+		return maxId;
+	}
 	public static boolean checkIfIsDifferent(String existBeam, String dummyBeam) {
 		// TODO Auto-generated method stub
 		boolean changed = false;
@@ -1128,8 +1310,7 @@ public class ConfigurationDao extends GenericDAO {
 		BeamBean beamReturned = null;
 		for (int i = 0; i < allBeamsList.size(); i++) {
 			BeamBean currentBeam = allBeamsList.get(i);
-			if (currentBeam.getBeamName().equalsIgnoreCase(dummyBean.getBeamName())
-					&& currentBeam.getIdBeam() == dummyBean.getIdBeam()) {
+			if (currentBeam.getBeamName().equalsIgnoreCase(dummyBean.getBeamName())) {
 				beamReturned = currentBeam;
 				break;
 			}
@@ -1175,7 +1356,7 @@ public class ConfigurationDao extends GenericDAO {
 			con.setAutoCommit(false);
 
 			String alterTable = "ALTER TABLE BEAM ADD DTO_DURATION_SQUARED NUMBER(11) DEFAULT 0";
-	
+
 			System.out.println(alterTable);
 			pstm = con.prepareStatement(alterTable);
 			// executing query
@@ -1197,6 +1378,225 @@ public class ConfigurationDao extends GenericDAO {
 			con.close();
 		} // end finally
 	}// end method
+
+	public void updateDatabase() throws Exception {
+		// ALTER TABLE ADD COLUMN TO BEAM
+		alterTableAddColumnBeam();
+
+		// get all beamId
+		List<BeamBean> allBeams = getBeamsSatellite();
+		// for every beam_id
+
+		for (int i = 0; i < allBeams.size(); i++) {
+			int sensorModeId = allBeams.get(i).getSensorMode();
+			// SELECT SW_DIM1, SW_DIM2, DTO_MIN_DURATION, DTO_MAX_DURATION, RES_TIME FROM
+			// SENSOR_MODE WHERE ID_SENSOR_MODE =
+			int SW_DIM1 = 0;
+			int SW_DIM2 = 0;
+			int DTO_MIN_DURATION = 0;
+			int DTO_MAX_DURATION = 0;
+			int RES_TIME = 0;
+			int IS_ENABLED = 0;
+//			int NEAR_OFF_NADIR_SAT = 0;
+//			int FAR_OFF_NADIR_SAT = 0;
+			String query = "SELECT SW_DIM1, SW_DIM2, DTO_MIN_DURATION, DTO_MAX_DURATION, RES_TIME FROM SENSOR_MODE WHERE ID_SENSOR_MODE = "
+					+ sensorModeId + ";";
+			System.out.println(query);
+
+			try {
+
+				con = checkConn();
+				PreparedStatement st = con.prepareStatement(query);
+				ResultSet rs = st.executeQuery();
+
+				while (rs.next()) {
+					// getting id
+					SW_DIM1 = rs.getInt("SW_DIM1");
+					SW_DIM2 = rs.getInt("SW_DIM2");
+					DTO_MIN_DURATION = rs.getInt("DTO_MIN_DURATION");
+					DTO_MAX_DURATION = rs.getInt("DTO_MAX_DURATION");
+					RES_TIME = rs.getInt("RES_TIME");
+				} // end while
+
+				// close result set
+				if (rs != null) {
+					rs.close();
+				}
+				// close statement
+				st.close();
+
+				int beamId = allBeams.get(i).getIdBeam();
+				// SELECT IS_ENABLED, NEAR_OFF_NADIR_SAT, FAR_OFF_NADIR_SAT FROM
+				// SAT_BEAM_ASSOCIATION WHERE BEAM ==
+
+				// query = "SELECT IS_ENABLED, NEAR_OFF_NADIR_SAT, FAR_OFF_NADIR_SAT FROM
+				// SAT_BEAM_ASSOCIATION WHERE BEAM == " + beamId+";";
+
+				query = "SELECT IS_ENABLED FROM SAT_BEAM_ASSOCIATION WHERE BEAM == " + beamId + ";";
+				System.out.println(query);
+
+				con = checkConn();
+				st = con.prepareStatement(query);
+				rs = st.executeQuery();
+
+				while (rs.next()) {
+					// getting id
+					IS_ENABLED = rs.getInt("IS_ENABLED");
+//								NEAR_OFF_NADIR_SAT = rs.getInt("NEAR_OFF_NADIR_SAT");
+//								FAR_OFF_NADIR_SAT = rs.getInt("FAR_OFF_NADIR_SAT");
+				} // end while
+
+				// close result set
+				if (rs != null) {
+					rs.close();
+				}
+				// close statement
+				st.close();
+
+				// update BEAM set SW_DIM1, SW_DIM2...
+				query = "UPDATE BEAM SET IS_ENABLED = " + IS_ENABLED + ", SW_DIM1=" + SW_DIM1 + ", SW_DIM2 =" + SW_DIM2
+						+ ", DTO_MIN_DURATION=" + DTO_MIN_DURATION + ",DTO_MAX_DURATION=" + DTO_MAX_DURATION
+						+ ",RES_TIME=" + RES_TIME + " WHERE ID_BEAM == " + beamId + " AND SENSOR_MODE ==" + sensorModeId
+						+ ";";
+				System.out.println(query);
+				st = con.prepareStatement(query);
+				st.execute();
+				st.close();
+				st = null;
+			} // end try
+			catch (Exception e) {
+				// rethrow
+				this.tm.critical(EventType.SOFTWARE_EVENT,
+						"Execution error of the query by prepared statement: " + query, e.getMessage());
+				throw e;
+			} // end catch
+			finally {
+				con.close();
+			}
+
+		}
+		alterTableDropColumn();
+
+	}
+
+	private void alterTableDropColumn() throws Exception {
+		PreparedStatement pstm = null;
+		try {
+			// ALTER TABLE DROP COLUMN FROM SENSOR_MODE
+			// ALTER TABLE DROP COLUMN FROM SAT_BEAM_ASSOCIATION
+			con = checkConn();
+			String alterTable = "ALTER TABLE SENSOR_MODE DROP SW_DIM1, DROP SW_DIM2, DROP DTO_MIN_DURATION,DROP DTO_MAX_DURATION,DROP RES_TIME;";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+			con = checkConn();
+			alterTable = "ALTER TABLE SAT_BEAM_ASSOCIATION DROP IS_ENABLED, DROP NEAR_OFF_NADIR_SAT,DROP FAR_OFF_NADIR_SAT;";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+		} // end try
+		catch (SQLException ex) {
+			// rethrow
+			this.tm.critical(EventType.SOFTWARE_EVENT, "Error alter table drop column : ", ex.getMessage());
+			throw ex;
+		} // end catch
+		finally {
+			// clse statement
+			if (pstm != null) {
+				pstm.close();
+			}
+			con.close();
+		} // end finally
+	}
+
+	private void alterTableAddColumnBeam() throws Exception {
+		PreparedStatement pstm = null;
+		try {
+			con = checkConn();
+			String alterTable = "ALTER TABLE BEAM ADD IS_ENABLED NUMBER(1) DEFAULT 0";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+			con = checkConn();
+			alterTable = "ALTER TABLE BEAM ADD SW_DIM1 NUMBER(11,4) DEFAULT 0";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+			con = checkConn();
+			alterTable = "ALTER TABLE BEAM ADD SW_DIM2 NUMBER(11,4) DEFAULT 0";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+			con = checkConn();
+			alterTable = "ALTER TABLE BEAM ADD DTO_MIN_DURATION NUMBER(11) DEFAULT 0";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+			con = checkConn();
+			alterTable = "ALTER TABLE BEAM ADD DTO_MAX_DURATION NUMBER(11) DEFAULT 0";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+			con = checkConn();
+			alterTable = "ALTER TABLE BEAM ADD RES_TIME NUMBER(11) DEFAULT 0";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+			con = checkConn();
+			alterTable = "ALTER TABLE BEAM ADD DTO_DURATION_SQUARED NUMBER(11) DEFAULT 0";
+			System.out.println(alterTable);
+			pstm = con.prepareStatement(alterTable);
+			pstm.execute();
+			pstm.close();
+			pstm = null;
+
+		} // end try
+		catch (SQLException ex) {
+			// rethrow
+			this.tm.critical(EventType.SOFTWARE_EVENT, "Error alter table BEAM : ", ex.getMessage());
+			throw ex;
+		} // end catch
+		finally {
+			// clse statement
+			if (pstm != null) {
+				pstm.close();
+			}
+			con.close();
+		} // end finally
+	}
+
+	private Connection checkConn() throws Exception {
+		if (con == null || con.isClosed()) {
+			con = super.initConnection();
+		}
+		// set autocommit to false
+		con.setAutoCommit(false);
+		return con;
+	}
 
 	/**
 	 * Populate satellite beam association table
@@ -1302,7 +1702,7 @@ public class ConfigurationDao extends GenericDAO {
 		// value to be returned
 		int idMission = 0;
 		// Query string
-		String query = "SELECT ID_MISSION  from MISSION  where   MISSION_NAME = " + "'" + missionName + "'";
+		String query = "SELECT ID_MISSION  from MISSION  where MISSION_NAME = " + "'" + missionName + "'";
 		try {
 
 			// ManagerLogger.logDebug(this, query);
@@ -1423,26 +1823,22 @@ public class ConfigurationDao extends GenericDAO {
 			PreparedStatement st = con.prepareStatement(query);
 			ResultSet rs = null;
 
-			try {
-				// execting query
-				rs = st.executeQuery();
+			// execting query
+			rs = st.executeQuery();
 
-				while (rs.next()) {
-					// getting id
-					idBeam = rs.getInt("ID_BEAM");
+			while (rs.next()) {
+				// getting id
+				idBeam = rs.getInt("ID_BEAM");
 
-				} // end while
+			} // end while
 
-			} // end try
-			finally {
-				// close result set
-				if (rs != null) {
-					rs.close();
-				}
-				// close statement
-				st.close();
+			// close result set
+			if (rs != null) {
+				rs.close();
+			}
+			// close statement
+			st.close();
 
-			} // end finally
 		} // end try
 		catch (Exception e) {
 			// rethrow
@@ -1451,8 +1847,10 @@ public class ConfigurationDao extends GenericDAO {
 			throw e;
 		} // end catch
 			// returning
+		finally {
+			con.close();
 
-		con.close();
+		}
 		return idBeam;
 	}// end method
 
@@ -1513,10 +1911,9 @@ public class ConfigurationDao extends GenericDAO {
 	 */
 	public int getIdSensorMode(String sensorModeName) throws Exception {
 		// value to be returned
-		int idSensorMode = 0;
+		int idSensorMode = -1;
 		// query string
-		String query = "SELECT ID_SENSOR_MODE  from SENSOR_MODE  where   SENSOR_MODE_NAME = " + "'" + sensorModeName
-				+ "'";
+		String query = "SELECT ID_SENSOR_MODE from SENSOR_MODE where SENSOR_MODE_NAME = " + "'" + sensorModeName + "'";
 		try {
 
 			// ManagerLogger.logDebug(this, query);

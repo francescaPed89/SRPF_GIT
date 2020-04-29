@@ -1221,6 +1221,10 @@ public class AcqReq implements Comparable<AcqReq>, Cloneable
         ArrayList<DTO> interferometricDtoList = new ArrayList<>();
 
         ArrayList<DTO> goodDTO = new ArrayList<>();
+        logger.debug("RETURNED interferometricSat "+interferometricSat);
+        logger.debug("RETURNED decorrelationTime "+decorrelationTime);
+        logger.debug("RETURNED decorrelationTolerance "+decorrelationTolerance);
+        logger.debug("RETURNED stopValidityTime "+stopValidityTime);
 
         /**
          * Iterate on dto list
@@ -1231,7 +1235,7 @@ public class AcqReq implements Comparable<AcqReq>, Cloneable
              * Retrieving DTO interferometric
              */
             DTO interferometricDTO = d.getInterferometricDTO(interferometricSat, decorrelationTime, decorrelationTolerance, stopValidityTime);
-
+logger.debug("RETURNED interfDTO "+interferometricDTO);
             /**
              * Add dto if not null
              */

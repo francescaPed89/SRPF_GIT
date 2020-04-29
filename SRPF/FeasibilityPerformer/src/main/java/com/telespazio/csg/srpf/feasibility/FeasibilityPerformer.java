@@ -1760,6 +1760,7 @@ public class FeasibilityPerformer
 		List<AcqReq> optimalAcqList = retVal.getAcquisitionRequestList();
 		
 		logger.debug("MODIFICA doFeasibility optimalAcqList returned as optimal " + optimalAcqList.size());
+		logger.debug("MODIFICA doFeasibility optimalAcqList returned as optimal " + optimalAcqList);
 
 
 
@@ -2469,7 +2470,7 @@ public class FeasibilityPerformer
 			 *
 			 */
 			if (this.isInterferometric) {
-				logger.debug("isInterferometric! optimalAcqList before " + optimalAcqList);
+				logger.debug("isInterferometric! optimalAcqList before " + optimalAcqList.size());
 
 				// Espando
 				if (needExpansion) {
@@ -2497,7 +2498,7 @@ public class FeasibilityPerformer
 					return new AlgoRetVal(optimalAcqList, algo);
 				} // ennd if
 
-				logger.debug("isInterferometric! optimalAcqList after " + optimalAcqList);
+				logger.debug("isInterferometric! optimalAcqList after " + optimalAcqList.size());
 
 			}
 
@@ -3044,6 +3045,7 @@ public class FeasibilityPerformer
 			if (interferometricAcq != null) {
 				toBeAddedAcq.add(interferometricAcq);
 			} else {
+				logger.debug("REMOVED ACQREQ because it doesn't have interferometric DTO!"+a);
 				toBeRemovedAcq.add(a);
 			}
 
@@ -3918,7 +3920,7 @@ public class FeasibilityPerformer
 			 */
 			dumpAcqReqInXML(programmingRequestNode, a, prParam, isSingleAcquired);
 		}
-
+		
 		// TODO Evaluate SUF:May be it should be commented
 		/**
 		 * Dumping FA section
@@ -4277,6 +4279,7 @@ public class FeasibilityPerformer
 		 */
 		pr.appendChild(AR);
 		// logger.info("AR Dumped");
+		
 	}// end method
 
 	/**

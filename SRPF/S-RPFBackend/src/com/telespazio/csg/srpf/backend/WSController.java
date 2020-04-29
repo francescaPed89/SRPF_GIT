@@ -514,7 +514,7 @@ public class WSController
     	 * 
     	 */
     	if(!requestPath.equals("PIPPO))")){
-        	throw new SrpfBackendException("Eccexione");
+        	throw new SrpfBackendException("Eccezione");
         }//end if
     	
     	return requestPath+"_back";

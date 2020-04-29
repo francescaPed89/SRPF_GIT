@@ -243,12 +243,16 @@ public class SparcBeamDB
     private SparcBeamDB()
     {
         this.dbFilePath = PropertiesReader.getInstance().getProperty(SPARC_BEAM_DB_FILE_CONF_KEY);
+        
+        System.out.println("SPARC_BEAM_DB_FILE_CONF_KEY : "+this.dbFilePath);
         if (this.dbFilePath == null)
         {
             // logger.warn("Unable to found " +
             // FeasibilityConstants.MAX_AREA_OF_INTEREST_CONF_KEY + " in
             // conffiguration");
             // just log
+            System.out.println("ERROR ! SPARC_BEAM_DB_FILE_CONF is null");
+
             this.tm.critical(EventType.SOFTWARE_EVENT, ProbableCause.CONFIGURATION_OR_CUSTOMIZATION_ERROR, "Unable to found " + SPARC_BEAM_DB_FILE_CONF_KEY + " in configuration");
         } // end if
         else

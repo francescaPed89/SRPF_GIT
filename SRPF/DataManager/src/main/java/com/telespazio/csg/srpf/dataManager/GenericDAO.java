@@ -86,8 +86,8 @@ public class GenericDAO {
 	 * @throws Exception
 	 */
 	protected Connection initConnection() throws Exception {// Connection to be returned
-		if (con != null && con.isValid(1000))
-//connection == null || !((ValidConnection) connection).isValid()
+		if (con != null && con.isValid(1))
+			//connection == null || !((ValidConnection) connection).isValid()
 		{
 			return con;
 		} else {
