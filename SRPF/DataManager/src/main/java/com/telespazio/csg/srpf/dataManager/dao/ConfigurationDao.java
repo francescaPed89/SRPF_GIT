@@ -49,6 +49,9 @@ import java.util.List;
 
 import javax.naming.NamingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.telespazio.csg.srpf.dataManager.GenericDAO;
 import com.telespazio.csg.srpf.dataManager.bean.BeamBean;
 import com.telespazio.csg.srpf.dataManager.bean.SatelliteBean;
@@ -64,11 +67,13 @@ import com.telespazio.csg.srpf.logging.constants.EventType;
  */
 
 public class ConfigurationDao extends GenericDAO {
+	static final Logger logger = LogManager.getLogger(ConfigurationDao.class.getName());
 
 	// comment
 	private static String StartComment = "M";
 	// number of expected values
 	private static int NumberOfExpectedEntryInLine = 18;
+	//static final Logger logger = LogManager.getLogger(ConfigurationDao.class.getName());
 
 	// logger
 	TraceManager tm = new TraceManager();
@@ -218,6 +223,167 @@ public class ConfigurationDao extends GenericDAO {
 		} // end finally
 		return beams;
 	}// end method
+
+	
+	/**
+	 * Reurn satellite bean given id
+	 * 
+	 * @author Abed
+	 * @param satID 
+	 * @param SatelliteName
+	 * @return Satellite bean
+	 * @throws Exception
+	 */
+	public BeamBean getBeamsFromID(String idBeam, int satID) throws Exception {
+
+		BeamBean beamReturned = null;
+		// Bean to be returned
+		// Query string
+		String query = "SELECT * from BEAM where BEAM_NAME =" + "'" + idBeam + "' AND ID_BEAM IN (SELECT BEAM \r\n" + 
+				"		                 FROM SAT_BEAM_ASSOCIATION " + 
+				"		                WHERE SATELLITE ="+ satID + ")";
+
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			// execute query
+			logger.debug(query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			st = con.prepareStatement(query);
+
+			rs = st.executeQuery();
+
+			// retieve values on records
+			while (rs.next()) {
+				beamReturned = new BeamBean();
+				beamReturned.setIdBeam(rs.getInt(1));
+				beamReturned.setBeamName(rs.getString(2));
+				beamReturned.setNearOffNadir(rs.getDouble(3));
+				beamReturned.setFarOffNadir(rs.getDouble(4));
+				beamReturned.setSensorMode(rs.getInt(5));
+				beamReturned.setIsEnabled(rs.getInt(6));
+				beamReturned.setSwDim1(rs.getDouble(7));
+				beamReturned.setSwDim2(rs.getDouble(8));
+				beamReturned.setDtoMinDuration(rs.getInt(9));
+				beamReturned.setDtoMaxDuration(rs.getInt(10));
+				beamReturned.setResTime(rs.getInt(11));
+				beamReturned.setDtoDurationSquared(rs.getInt(12));
+				
+			} // end while
+
+		} // end try
+		catch (Exception e) {
+			// rethrow
+			this.tm.critical(EventType.SOFTWARE_EVENT, "Execution error of the query by prepared statement: " + query,
+					e.getMessage());
+			throw e;
+		} // end catch
+		finally {
+			// close result set
+			if (rs != null) {
+				rs.close();
+			}
+			// close statement
+			st.close();
+			con.close();
+		} // end finally
+		return beamReturned;
+	}// end method
+
+	
+	/**
+	 * Reurn satellite bean given id
+	 * 
+	 * @author Abed
+	 * @param offNadirAngle 
+	 * @param SatelliteName
+	 * @return Satellite bean
+	 * @throws Exception
+	 */
+	public List<BeamBean> getBeamsSatelliteRefined(double nearOffNadir, double farOffNadir, int idSatellite) throws Exception {
+
+		List<BeamBean> beams = getBeamsSatellite();
+
+		List<Integer> allSatBeamId= new ArrayList<Integer>();
+		// Bean to be returned
+		// Query string
+		String query = "SELECT BEAM FROM SAT_BEAM_ASSOCIATION where SATELLITE =" + "'" + idSatellite + "'";
+		logger.debug("query beam  :"+query);
+
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			// execute query
+			this.tm.debug(query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			st = con.prepareStatement(query);
+
+			rs = st.executeQuery();
+			BeamBean returnedBeam = null;
+			// retieve values on records
+			while (rs.next()) {
+				allSatBeamId.add(rs.getInt(1));
+			} // end while
+
+			
+			if(allSatBeamId.size()>0 && beams.size()>0)
+			{        
+				logger.debug("allSatBeamId :"+allSatBeamId);
+
+				beams = filterBeamsForSatelliteAndNearOffAngle(allSatBeamId,beams,nearOffNadir,farOffNadir);
+				
+			}
+		} // end try
+		catch (Exception e) {
+			// rethrow
+			this.tm.critical(EventType.SOFTWARE_EVENT, "Execution error of the query by prepared statement: " + query,
+					e.getMessage());
+			throw e;
+		} // end catch
+		finally {
+			// close result set
+			if (rs != null) {
+				rs.close();
+			}
+			// close statement
+			st.close();
+			con.close();
+		} // end finally
+		return beams;
+	}// end method
+
+	private List<BeamBean> filterBeamsForSatelliteAndNearOffAngle(List<Integer> allSatBeamId, List<BeamBean> beams,
+			double nearOff, double farOffNadir) {
+		List<BeamBean> onlyValid = new ArrayList<BeamBean>();
+		logger.debug(" beam  id:"+onlyValid);
+		logger.debug(" nearOff :"+nearOff);
+		logger.debug(" farOffNadir :"+farOffNadir);
+
+		for(int i=0;i<beams.size();i++)
+		{
+			for(int j=0;j<allSatBeamId.size();j++)
+			{
+				BeamBean currentBeam = beams.get(i);
+				if(currentBeam.getIdBeam()==allSatBeamId.get(j))
+				{
+					
+					if(currentBeam.getNearOffNadir()<=farOffNadir && currentBeam.getFarOffNadir()>=nearOff)
+					{
+						logger.debug("valid beam  :"+currentBeam);
+
+						onlyValid.add(currentBeam);
+					}
+				}
+			}
+		}
+		return onlyValid;
+	}
 
 	/**
 	 * Retrurns the ID of satellites belonging the given mission
@@ -1930,6 +2096,68 @@ public class ConfigurationDao extends GenericDAO {
 				while (rs.next()) {
 					// getting sensor mode
 					idSensorMode = rs.getInt("ID_SENSOR_MODE");
+
+				} // end while
+
+			} // end try
+			finally {
+				// close result set
+				if (rs != null) {
+					rs.close();
+				}
+				// close statement
+				st.close();
+
+			} // end finally
+		} catch (Exception e)
+
+		{
+			// rethrow
+			this.tm.critical(EventType.SOFTWARE_EVENT, "Execution error of the query by prepared statement: " + query,
+					e.getMessage());
+			throw e;
+
+		} // end catch
+			// returning
+		finally {
+			con.close();
+		}
+		return idSensorMode;
+	}// end method
+
+	
+	
+	/**
+	 * Retirn the sensormode id given its name
+	 * 
+	 * @author Abed Alissa
+	 * @version 1.0
+	 * @date
+	 * @param sensorModeName
+	 * @return sensor mode id
+	 * @throws Exception
+	 */
+	public String getSensorModeName(int sensorModeId) throws Exception {
+		// value to be returned
+		String idSensorMode = null;
+		// query string
+		String query = "SELECT SENSOR_MODE_NAME from SENSOR_MODE where ID_SENSOR_MODE = " + "'" + sensorModeId + "'";
+		try {
+
+			// ManagerLogger.logDebug(this, query);
+			if (con == null || con.isClosed()) {
+				con = super.initConnection();
+			}
+			PreparedStatement st = con.prepareStatement(query);
+			ResultSet rs = null;
+
+			try {
+				// executing query
+				rs = st.executeQuery();
+
+				while (rs.next()) {
+					// getting sensor mode
+					idSensorMode = rs.getString("SENSOR_MODE_NAME");
 
 				} // end while
 

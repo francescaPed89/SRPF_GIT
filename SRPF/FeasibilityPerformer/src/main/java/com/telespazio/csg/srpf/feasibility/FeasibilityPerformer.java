@@ -1747,6 +1747,7 @@ public class FeasibilityPerformer
 
 		}
 		FeasibilityPerformer.logger.debug("number of iterations updated : "+this.numberOfOuterIteration);
+		FeasibilityPerformer.logger.debug("INVOKING SPARC! from doFeasibility ");
 
 		/**
 		 * Evaluating base solution and invoking sparc, if is enabled
@@ -2165,6 +2166,8 @@ public class FeasibilityPerformer
 				// upperTimeTorequest + newdelta, stopValidityTime + newdelta);
 
 				AccessesEvaluator eval = new AccessesEvaluator();
+				FeasibilityPerformer.logger.debug("INVOKING SPARC! from performRepetitivePeriodicTasks ");
+
 				eval.evaluateSatelliteAccesses(this.satList, this.gridPointList, request);
 				AlgoRetVal retVal = optimalAcqReqList(request, stopValidityTime + newdelta, isSpotLight, true);
 				OptimizationAlgoInterface algo = retVal.getAlgo();
@@ -4316,6 +4319,8 @@ public class FeasibilityPerformer
 		 */
 		Element mission = XMLUtils.createElement(this.doc, this.namespaceMap, FeasibilityConstants.MissionTagName,
 				FeasibilityConstants.MissionTagNameNS);
+		logger.debug("from createDTOXMLElement");
+
 		mission.setTextContent(dto.getDtoAccessList().get(0).getMissionName());
 		platform.appendChild(mission);
 

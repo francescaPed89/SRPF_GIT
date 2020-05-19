@@ -240,6 +240,7 @@ public class InnerOptimizationLoopIterator
          */
         GridPoint p;
         logger.trace("MODIFICA SCELTO DTO _ ACCESS LIST:" + dto.getDtoAccessList().size());
+		logger.debug("from iterate");
 
         for (Access a : dto.getDtoAccessList())
 

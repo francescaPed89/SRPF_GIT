@@ -34,6 +34,8 @@
 package com.telespazio.csg.srpf.feasibility;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.telespazio.csg.srpf.dataManager.bean.BeamBean;
 import com.telespazio.csg.srpf.dataManager.bean.EpochBean;
@@ -49,82 +51,99 @@ import com.telespazio.csg.srpf.utils.ReferenceFrameUtils;
  */
 public class Access implements Comparable<Access>
 {
+	static final Logger logger = LogManager.getLogger(Access.class.getName());
+
+//    @Override
+//    public String toString()
+//    {
+//        return "Access [point=" + point + ", missionName=" + missionName + ", accessTime=" + accessTime + ", offNadir=" + offNadir + ", lookSide=" + lookSide + ", orbitDirection=" + orbitDirection + ", orbitId=" + orbitId + ", satellitePos=" + satellitePos + ", satelliteVel=" + satelliteVel + ", orbitType=" + orbitType + ", beam=" + beam + ", satellite=" + satellite + ", startingPointWindowIndex=" + startingPointWindowIndex + ", id=" + id + "]";
+//    }
 
     @Override
     public String toString()
     {
-        return "Access [point=" + point + ", missionName=" + missionName + ", accessTime=" + accessTime + ", offNadir=" + offNadir + ", lookSide=" + lookSide + ", orbitDirection=" + orbitDirection + ", orbitId=" + orbitId + ", satellitePos=" + satellitePos + ", satelliteVel=" + satelliteVel + ", orbitType=" + orbitType + ", beam=" + beam + ", satellite=" + satellite + ", startingPointWindowIndex=" + startingPointWindowIndex + ", id=" + id + "]";
+//    	logger.debug("accessTime "+this.getAccessTime());
+//    	logger.debug("lookSide "+this.getLookSide());
+//    	logger.debug("orbitDirection "+this.getOrbitDirection());
+//    	logger.debug("orbitId "+this.getOrbitId());
+//    	logger.debug("satellitePos "+this.getSatellitePos());
+//    	logger.debug("satelliteVel "+this.getSatelliteVel());
+//    	logger.debug("orbitType "+this.getOrbitType());
+//    	logger.debug("beam "+this.getBeam());
+        return "" ;
     }
-
-    /*
+    public GridPoint getPoint() {
+		return point;
+	}
+	/*
      * + A grid point
      */
-    private GridPoint point;
+    private GridPoint point = null;
     /*
      * + The mission nane
      */
 
-    private String missionName;
+    private String missionName = null;
     /**
      * Julian time
      */
 
-    private double accessTime;
+    private double accessTime = 0;
 
     /**
      * off nadir angle
      */
-    private double offNadir;
+    private double offNadir = 0;
 
     /**
      * look side
      */
-    private int lookSide;
+    private int lookSide = 0;
 
     /**
      * orbit direction
      */
-    private int orbitDirection;
+    private int orbitDirection = 0;
 
     /**
      * orbit id number
      */
-    private long orbitId;
+    private long orbitId = 0;
 
     /**
      * Satellite position
      */
-    private Vector3D satellitePos;
+    private Vector3D satellitePos = null;
 
     /**
      * Satlellite velocity
      */
-    private Vector3D satelliteVel;
+    private Vector3D satelliteVel = null;
 
     /**
      * detemine if ODSTP OMTP ODNOM ODREF
      */
-    private int orbitType;
+    private int orbitType =0;
 
     /**
      * The bean of the representing the beam
      */
-    private BeamBean beam;
+    private BeamBean beam =null;
 
     /**
      * Satellite accessing the point
      */
-    private Satellite satellite;
+    private Satellite satellite = null;
 
     /**
      * starting index of the time window involved in the access
      */
-    private int startingPointWindowIndex;
+    private int startingPointWindowIndex = 0;
 
     /**
      * Unique identifier
      */
-    int id;
+    int id=0;
 
     /**
      * Set the unique id
@@ -170,6 +189,8 @@ public class Access implements Comparable<Access>
      */
     public Access(String missionName, GridPoint point, Satellite satellite, double accessTime, double offNadir, int lookSide, final BeamBean beam, int orbitDirection, long orbitId, Vector3D satellitePos, Vector3D satelliteVel, int orbitType, int startingPointWindowIndex)
     {
+        logger.debug("inside access");
+
         /**
          *
          * Setting the parameters
@@ -177,7 +198,6 @@ public class Access implements Comparable<Access>
          */
         this.missionName = missionName;
         this.point = point;
-        this.satellite = satellite;
         this.accessTime = accessTime;
         this.offNadir = offNadir;
         this.lookSide = lookSide;
@@ -188,6 +208,34 @@ public class Access implements Comparable<Access>
         this.orbitType = orbitType;
         this.beam = beam;
         this.startingPointWindowIndex = startingPointWindowIndex;
+        this.satellite = satellite;
+
+
+    }// end method
+    
+    public Access(String missionName, GridPoint point, double accessTime, double offNadir, int lookSide, final BeamBean beam, int orbitDirection, long orbitId, Vector3D satellitePos, Vector3D satelliteVel, int orbitType, int startingPointWindowIndex)
+    {
+   
+
+        /**
+         *
+         * Setting the parameters
+         *
+         */
+        this.missionName = missionName;
+        this.point = point;
+        this.accessTime = accessTime;
+        this.offNadir = offNadir;
+        this.lookSide = lookSide;
+        this.orbitDirection = orbitDirection;
+        this.orbitId = orbitId;
+        this.satellitePos = satellitePos;
+        this.satelliteVel = satelliteVel;
+        this.orbitType = orbitType;
+        this.beam = beam;
+        this.startingPointWindowIndex = startingPointWindowIndex;
+   
+
 
     }// end method
 

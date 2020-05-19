@@ -82,26 +82,34 @@ public class Satellite implements Comparable<Satellite>
 	/**
 	 * Satellite bean as for DB
 	 */
-	private SatelliteBean satellite;
+	private SatelliteBean satellite = null;
+
+	public SatelliteBean getSatellite() {
+		return satellite;
+	}
+
+	public void setSatellite(SatelliteBean satellite) {
+		this.satellite = satellite;
+	}
 
 	/**
 	 * Epochs list
 	 */
-	private ArrayList<EpochBean> epochs;
+	private ArrayList<EpochBean> epochs= new ArrayList<>();
 	/**
 	 * Beams list
 	 */
-	private ArrayList<BeamBean> beams = null;
+	private ArrayList<BeamBean> beams =new ArrayList<>();
 
 	/**
 	 * Platform activity window list
 	 */
-	private ArrayList<PlatformActivityWindowBean> pawList = null;
+	private ArrayList<PlatformActivityWindowBean> pawList = new ArrayList<>();
 
 	/**
 	 * list of satellite pass
 	 */
-	private ArrayList<SatellitePassBean> satellitePassList = null;
+	private ArrayList<SatellitePassBean> satellitePassList= new ArrayList<>();
 
 	public Satellite() {
 		super();
@@ -112,25 +120,25 @@ public class Satellite implements Comparable<Satellite>
 	 *
 	 * min duration for a stripmap
 	 */
-	private double stripMapMinimalDuration;
+	private double stripMapMinimalDuration =0;
 	/**
 	 * max duration for a strip
 	 */
-	private double stripMapMaximalDuration;
+	private double stripMapMaximalDuration =0;
 	/**
 	 * time for restore a sensor
 	 */
-	private double sensorRestoreTime;
+	private double sensorRestoreTime = 0;
 
 	/**
 	 * spotLight durationStep
 	 */
-	private double spotLightTimeStep;
+	private double spotLightTimeStep = 0;
 
 	/**
 	 * half of the minimal duration for a spotLight
 	 */
-	private double spotLightHalfTimeStep;
+	private double spotLightHalfTimeStep = 0;
 
 	// orbit inclination
 	// private double orbitInclination;
@@ -141,7 +149,7 @@ public class Satellite implements Comparable<Satellite>
 	/**
 	 * List of access belonging the satellite
 	 */
-	private List<Access> accessList = new ArrayList<>();
+	private List<Access> accessList = new ArrayList<Access>();
 
 	/**
 	 * List of strip belonging the satellite
@@ -163,7 +171,7 @@ public class Satellite implements Comparable<Satellite>
 	 * depending on the senso mode is used to evaluate if a satellite cab be used
 	 * for acquisition afetr a prevois acuisition
 	 */
-	private double threshold;
+	private double threshold = 0;
 
 	/**
 	 * Number of milliseconds to be added to threshold
@@ -267,9 +275,18 @@ public class Satellite implements Comparable<Satellite>
 	 * @param a
 	 */
 	public void addAccess(Access a) {
-		// adding access
-		a.setId(this.accessList.size() + 1);
-		this.accessList.add(a);
+		if(this.getAccessList()==null)
+		{
+			this.setAccessList(new ArrayList<Access>());
+			a.setId(1);
+		}
+		else
+		{
+			// adding access
+			a.setId(this.getAccessList().size() + 1);
+		}
+
+		this.getAccessList().add(a);
 	}// end method
 
 	/**
@@ -1185,6 +1202,17 @@ public class Satellite implements Comparable<Satellite>
 		return epochBean;
 	}// end method
 
+	@Override
+	public String toString() {
+		return "Satellite [ beams=" + beams + ", pawList=" + pawList
+				+ ", satellitePassList=" + satellitePassList + ", stripMapMinimalDuration=" + stripMapMinimalDuration
+				+ ", stripMapMaximalDuration=" + stripMapMaximalDuration + ", sensorRestoreTime=" + sensorRestoreTime
+				+ ", spotLightTimeStep=" + spotLightTimeStep + ", spotLightHalfTimeStep=" + spotLightHalfTimeStep
+				+ ", accessList=" + accessList + ", stripList=" + stripList + ", trackOffSet=" + trackOffSet
+				+ ", oldDTOList=" + oldDTOList + ", threshold=" + threshold + ", extraTimeThreshold="
+				+ extraTimeThreshold + "]";
+	}
+
 	/**
 	 * Return the starting index of the four sample epochs window where the access
 	 * time fall In case of the accessTime doesn't fall between a sliding window of
@@ -1318,7 +1346,7 @@ public class Satellite implements Comparable<Satellite>
 		 * guard time
 		 */
 		double guardTime = guardCoefficient * this.getStripMapMinimalDuration();
-
+		logger.debug("paw list : "+this.pawList);
 		if (this.pawList != null) {
 			/**
 			 * searching in paw
@@ -1419,6 +1447,11 @@ public class Satellite implements Comparable<Satellite>
 				 */
 				activityStart = paw.getActivityStartTime();
 				activityStop = paw.getActivityStopTime();
+            	logger.debug("---------------------------------activityStart  "+DateUtils.fromCSKDateToDateTime(activityStart));
+            	logger.debug("---------------------------------activityStop "+DateUtils.fromCSKDateToDateTime(activityStop));
+            	logger.debug("---------------------------------dtoStartTime "+DateUtils.fromCSKDateToDateTime(dtoStartTime));
+
+            	logger.debug("---------------------------------dtoStopTime "+DateUtils.fromCSKDateToDateTime(dtoStopTime));
 
 				if ((dtoStopTime < activityStart) || (dtoStartTime > activityStop)) {
 					/**

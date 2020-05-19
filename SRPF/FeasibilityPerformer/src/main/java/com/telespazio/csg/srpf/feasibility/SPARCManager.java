@@ -284,9 +284,9 @@ public class SPARCManager
 
 	{
 
-//		logger.debug("PRREQUESTPARAMETER STOP TIME ------------------------------------------------------ "+programmingRequest.getStopTime());
+		logger.debug("PRREQUESTPARAMETER STOP TIME ------------------------------------------------------ "+programmingRequest.getStopTime());
 		double dateAsDouble = DateUtils.fromISOToCSKDate(programmingRequest.getStopTime());
-//		logger.debug("PRREQUESTPARAMETER dateAsDouble ------------------------------------------------------ "+dateAsDouble);
+		logger.debug("PRREQUESTPARAMETER dateAsDouble ------------------------------------------------------ "+dateAsDouble);
 
 		// settinhg parameters
 		this.dem = dem;
@@ -829,14 +829,12 @@ public class SPARCManager
 		// Inserting Stripmap flag
 		String flag = trueFlag;
 		if (dto instanceof SpotLightDTO) {
-			logger.debug("24.02.2020 is SpotLight");
 
 			// //System.out.println("-------------------Spot DTO");
 			flag = falseFlag;
 			
 		} // end if
 		else {
-			logger.debug("24.02.2020 is Stripmap");
 
 	        	//check the duration of the dto
 	        	//if it is larger than the minDuration set the flag to true, set false otherwise
@@ -955,6 +953,7 @@ public class SPARCManager
 
 		// in case of slave interf dto
 		List<Access> accessList = dto.getMasterInterferometricDtoAccessList();
+		logger.debug("from insertAOIInfoToDTOInfo");
 
 		// no slave interferometric
 		if (accessList == null) {

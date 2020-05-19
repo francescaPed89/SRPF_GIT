@@ -1060,6 +1060,8 @@ public class SpotLightDTO extends DTO
 				retval.setSquareStop(this.squareStop + difftime);
 
 				retval.setOdrefBased(a.getOrbitType() == FeasibilityConstants.OdrefType);
+                logger.debug("from getInterferometricDTO2");
+
 				retval.setDtoAccessList(interferometricAccessList);
 
 				retval.setMasterInterferometricDtoAccessList(this.dtoAccessList);

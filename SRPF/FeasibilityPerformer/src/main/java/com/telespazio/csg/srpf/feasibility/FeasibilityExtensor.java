@@ -43,6 +43,8 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -66,6 +68,7 @@ import com.telespazio.csg.srpf.utils.XMLUtils;
 public class FeasibilityExtensor extends FeasibilityPerformer
 
 {
+	static final Logger logger = LogManager.getLogger(FeasibilityExtensor.class.getName());
 
     /**
      * log
@@ -828,6 +831,7 @@ public class FeasibilityExtensor extends FeasibilityPerformer
                 s.setOldDTOList(this.oldDTOList);
             }
         }
+		logger.debug("INVOKING SPARC! from performAcquisitionRequestExtension ");
 
         AlgoRetVal retVal = optimalAcqReqList(request, stopValidityTime, isSpotLight, false);
 

@@ -406,6 +406,8 @@ public class AcqReq implements Comparable<AcqReq>, Cloneable
             /**
              * Evaluating threshold
              */
+    		logger.debug("from dtoConflictWithAR");
+
             double threshold = FeasibilityConstants.forTwo * dto.getDtoAccessList().get(0).getSatellite().getStripMapMinimalDuration();
 
             double upperLimit;
@@ -543,7 +545,8 @@ public class AcqReq implements Comparable<AcqReq>, Cloneable
 
                     } // end if
                     else
-                    {
+                    {    		logger.debug("from expandDTOList");
+
                         logger.debug("non deve entrarci mai !");
                         /**
                          * Expansion is based on first access
@@ -582,6 +585,7 @@ public class AcqReq implements Comparable<AcqReq>, Cloneable
                     dtoList.add(a); // since CSG single acquired are not
                                     // expanded we don't need the full access
                                     // list to evaluate the AOI in sparc input
+                    logger.debug("from expandDTOList");
                     newDto.setDtoAccessList(dtoList);
 
                

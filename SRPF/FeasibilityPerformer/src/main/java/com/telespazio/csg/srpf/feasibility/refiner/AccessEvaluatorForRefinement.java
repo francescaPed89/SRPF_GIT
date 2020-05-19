@@ -30,13 +30,21 @@
 
 package com.telespazio.csg.srpf.feasibility.refiner;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionNewtonForm;
 import org.apache.commons.math3.analysis.solvers.NewtonRaphsonSolver;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.telespazio.csg.srpf.dataManager.bean.BeamBean;
+import com.telespazio.csg.srpf.dataManager.bo.SatelliteBO;
+import com.telespazio.csg.srpf.dataManager.dao.ConfigurationDao;
 import com.telespazio.csg.srpf.feasibility.Access;
 import com.telespazio.csg.srpf.feasibility.AccessesEvaluator;
 import com.telespazio.csg.srpf.feasibility.GridPoint;
@@ -44,6 +52,7 @@ import com.telespazio.csg.srpf.feasibility.Satellite;
 import com.telespazio.csg.srpf.logging.TraceManager;
 import com.telespazio.csg.srpf.logging.constants.EventType;
 import com.telespazio.csg.srpf.logging.constants.ProbableCause;
+import com.telespazio.csg.srpf.utils.DateUtils;
 
 /**
  *
@@ -56,6 +65,7 @@ import com.telespazio.csg.srpf.logging.constants.ProbableCause;
 public class AccessEvaluatorForRefinement extends AccessesEvaluator
 
 {
+	static final Logger logger = LogManager.getLogger(AccessEvaluatorForRefinement.class.getName());
 
     // logger
     TraceManager tracer = new TraceManager();
@@ -170,38 +180,69 @@ public class AccessEvaluatorForRefinement extends AccessesEvaluator
             {
                 return;
             }
-
-            // List<BeamBean> beams = satellite.getBeams();
-
-            // logger.debug(" beamList size: " + beams.size());
-
+//            logger.debug("start new method :");
+//
+    		ConfigurationDao dao = new ConfigurationDao();
             BeamBean currentBeam = null;
-            ;
+            List<BeamBean> beams = satellite.getBeams();
 
-            // //System.out.println(absOffNadirAngle + " >= " +
-            // currentBeam.getNearOffNadir() +" && " + absOffNadirAngle+" <=
-            // "+currentBeam.getFarOffNadir() );
+            beams = dao.getBeamsSatelliteRefined(absOffNadirAngle, absOffNadirAngle,satellite.getSatID());
 
-            // create access
-            access = new Access(satellite.getMissionName(), p, satellite, accessTime, absOffNadirAngle, lookSide, currentBeam, orbitDir,
-                    // s1.getIdOrbit(),
-                    evaluateOrbitNumber(satPosAtZeroDoppler), satPosAtZeroDoppler, satVelAtZeroDoppler, this.s1.getDataType(), startingPointWindowIndex);
-
-            // Check if look side and orbit direction are in line with the
-            // request and if the satellite can look at that side
-
-            boolean checkAgainstPr = true;
-            boolean checkForPassThrough = true;
-
-            if (checkAgainstPr && checkForPassThrough && satellite.checkLookSide(lookSide) && satellite.checkForPaw(access))
+            if(beams!=null && !beams.isEmpty())
             {
+                logger.debug("get only valid beams :"+ beams.size());
 
-                satellite.addAccess(access);
-            } // end if
+            	for(int i=0;i<beams.size();i++)
+            	{
+                	currentBeam = beams.get(i);
+                	String sensorMode = dao.getSensorModeName(currentBeam.getSensorMode());
+                	currentBeam.setSensorModeName(sensorMode);
+                    // create access
+                    access = new Access(satellite.getMissionName(), p, satellite, accessTime, absOffNadirAngle, lookSide, currentBeam, orbitDir,
+                            // s1.getIdOrbit(),
+                            evaluateOrbitNumber(satPosAtZeroDoppler), satPosAtZeroDoppler, satVelAtZeroDoppler, this.s1.getDataType(), startingPointWindowIndex);
+               	
+               	 // logger.debug("new access :"+ access);
 
+                    // Check if look side and orbit direction are in line with the
+                    // request and if the satellite can look at that side
+
+                    boolean checkAgainstPr = true;
+                    boolean checkForPassThrough = true;
+//                    logger.debug("for  satellite.checkLookSide(lookSide) :"+ satellite.checkLookSide(lookSide));
+//                    logger.debug("for  satellite.checkForPaw(access):"+ satellite.checkForPaw(access));
+
+                    if (checkAgainstPr && checkForPassThrough && satellite.checkLookSide(lookSide) && satellite.checkForPaw(access))
+                    {
+                        //logger.debug("adding access from getAccessList:"+access);
+
+                        /*
+                         * 
+                         */
+                        
+                        satellite.getAccessList().add(access);
+                        
+                        logger.debug("access added.");
+
+                    } // end if
+                    else
+                    {
+                        logger.debug("one of the previous constraint is failed !:");
+
+                    }
+            	}
+            }
+
+         if(satellite.getAccessList()!=null )
+         {
+             logger.debug("for  satellite.getAccessList() :"+ satellite.getAccessList().size());
+         }
+
+          
         } // end tryu
-        catch (TooManyEvaluationsException | IllegalArgumentException e)
+        catch ( Exception e)
         {
+        	DateUtils.getLogInfo(e, logger);
             // subAccessesList=null;
             // logger.error("Eccezione: " + e.getMessage());
             // do nothing
@@ -211,5 +252,11 @@ public class AccessEvaluatorForRefinement extends AccessesEvaluator
 
         // return subAccessesList;
     } // end getAccess
+
+	private List<BeamBean> setBeamAccess(double absOffNadirAngle, int satId) {
+		List<BeamBean> allBeamsForAccess = new ArrayList<BeamBean>();		
+		return allBeamsForAccess;
+		
+	}
 
 }// end class

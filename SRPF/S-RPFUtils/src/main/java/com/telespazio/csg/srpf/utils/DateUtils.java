@@ -213,8 +213,9 @@ public class DateUtils
 		logger.error("ON CLASS : "+stackTraceElement[0].getClassName());
 		logger.error("ON METHOD "+stackTraceElement[0].getMethodName());
 		logger.error("AT LINE "+lineNumber);
-
+		e.getStackTrace();
 		e.printStackTrace();
+		logger.error(e);
 	}
 	
     /**

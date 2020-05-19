@@ -46,6 +46,7 @@ import com.telespazio.csg.srpf.dataManager.bean.EpochBean;
 import com.telespazio.csg.srpf.logging.TraceManager;
 import com.telespazio.csg.srpf.logging.constants.EventType;
 import com.telespazio.csg.srpf.logging.constants.ProbableCause;
+import com.telespazio.csg.srpf.utils.DateUtils;
 import com.telespazio.csg.srpf.utils.ReferenceFrameUtils;
 
 /**
@@ -236,7 +237,7 @@ public class AccessesEvaluator
     {
         // Perform a test in each point in the grid
        
-        // logger.debug("GridPointListSize: " + gridPointList.size());
+        logger.debug("evaluateSatelliteAccessEvents: " );
 
         /**
          * List of epochs on wich search access
@@ -259,7 +260,7 @@ public class AccessesEvaluator
         for (GridPoint currentPoint : this.gridPointList)
 
         {
-            // logger.debug( " Gridpoint: " + currentPoint.getId());
+            logger.debug( " Gridpoint: " + currentPoint.getId());
             // TODO : capire numberOfGuardSample
             int i = 0 + this.numberOfGuardSample;
             while ((i + 3) < epochListSize)
@@ -302,6 +303,10 @@ public class AccessesEvaluator
                         evaluateAccesses(currentPoint, satellite, i);
 
                     } // end if
+                    else
+                    {
+                        logger.debug( " isAbleToView = false!");
+                    }
 
                 }
                 i++;
@@ -605,8 +610,9 @@ public class AccessesEvaluator
             } // end if
 
         } // End try
-        catch (TooManyEvaluationsException | IllegalArgumentException e)
+        catch (Exception e)
         {
+        	DateUtils.getLogInfo(e, logger);
             // subAccessesList=null;
             // logger.error("Eccezione: " + e.getMessage());
             this.tracer.warning(EventType.APPLICATION_EVENT, ProbableCause.SOFTWARE_ERROR, e.getMessage());
