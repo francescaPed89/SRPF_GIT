@@ -1,26 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-	<wb-module deploy-name="S-RPFBackend-2.2.9p">
+	<wb-module deploy-name="S-RPFBackend-2.2.12p">
 		<wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
 		<wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
 		<wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <dependent-module archiveName="feasibilityPerformer-2.2.9p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/feasibilityPerformer/feasibilityPerformer">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="eventlog-2.2.9p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/eventlog/eventlog">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="DATAManager-2.2.9p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/DATAManager/DATAManager">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="utils-2.2.9p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/utils/utils">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="dem-2.2.9p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/dem/dem">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="SUFCalculator-2.2.9p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/SUFCalculator/SUFCalculator">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
 		<property name="context-root" value="S-RPFBackend"/>
 		<property name="java-output-path" value="/S-RPFBackend/target/classes"/>
 		<property name="component.exclusion.patterns" value="WEB-INF/lib/servlet-api-3.1.FR.jar"/>

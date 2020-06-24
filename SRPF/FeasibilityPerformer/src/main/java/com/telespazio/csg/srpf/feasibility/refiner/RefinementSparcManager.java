@@ -56,6 +56,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
+import com.telespazio.csg.srpf.dem.DEMManager;
 import com.telespazio.csg.srpf.feasibility.DTO;
 import com.telespazio.csg.srpf.feasibility.FeasibilityConstants;
 import com.telespazio.csg.srpf.feasibility.FeasibilityException;
@@ -101,15 +102,16 @@ public class RefinementSparcManager extends SPARCManager
 	 * @param prArMap    map prid vs ar dto map
 	 * @param sparcMode
 	 * @param workingDir
+	 * @param dem 
 	 * @throws ParserConfigurationException
 	 * @throws ParserConfigurationException, TransformerException
 	 */
-	public RefinementSparcManager(Map<String, Map<String, Map<String, DTO>>> prArMap, int sparcMode, String workingDir)
+	public RefinementSparcManager(Map<String, Map<String, Map<String, DTO>>> prArMap, int sparcMode, String workingDir, DEMManager dem)
 			throws ParserConfigurationException, TransformerException {
 		super();
 		this.workingDir = workingDir;
 		this.sparcMode = sparcMode;
-
+		this.dem=dem;
 		// schema default
 		this.outPutSchema = "/opt/SRPF/SPARC/XML_SCHEMAS/RefinementOutput.xsd";
 

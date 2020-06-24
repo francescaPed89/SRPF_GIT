@@ -484,6 +484,8 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		PlatformActivityWindowDAO.logger.debug(" getPaws:  " + query);
 		PlatformActivityWindowDAO.logger.debug(" with initial epoch:  " + DateUtils.fromCSKDateToDateTime(start));
 		PlatformActivityWindowDAO.logger.debug(" and final epoch :  " + DateUtils.fromCSKDateToDateTime(stop));
+		PlatformActivityWindowDAO.logger.debug(" with initial epoch (double):  " + start);
+		PlatformActivityWindowDAO.logger.debug(" and final epoch (double):  " + stop);
 
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -491,7 +493,7 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 		String newSatelliteName = "";
 		PlatformActivityWindowBean pawData;
 
-		ArrayList<PlatformActivityWindowBean> currentSatellitePawList = new ArrayList<>();
+		//ArrayList<PlatformActivityWindowBean> currentSatellitePawList = new ArrayList<>();
 
 		try {
 			if (con == null || con.isClosed()) {
@@ -543,13 +545,26 @@ public class PlatformActivityWindowDAO extends GenericDAO {
 				} else {
 					PlatformActivityWindowDAO.logger.debug(" paw overlap partially in start ");
 				}
-
+				PlatformActivityWindowDAO.logger.debug("pawMap :"+pawMap);
 				if (pawMap.get(newSatelliteName) != null) {
+					PlatformActivityWindowDAO.logger.debug("pawMap not empty for  newSatelliteName:"+newSatelliteName);
+					PlatformActivityWindowDAO.logger.debug("pawMap not empty for  newSatelliteName:"+pawMap.get(newSatelliteName));
+
 					pawMap.get(newSatelliteName).add(pawData);
+					PlatformActivityWindowDAO.logger.debug("pawMap not empty for  newSatelliteName after insert:"+pawMap.get(newSatelliteName));
+
 				} else {
+					PlatformActivityWindowDAO.logger.debug("pawMap is empty for  newSatelliteName:"+newSatelliteName);
+					PlatformActivityWindowDAO.logger.debug("pawMap is empty for  newSatelliteName:"+pawMap.get(newSatelliteName));
+					ArrayList<PlatformActivityWindowBean> currentSatellitePawList = new ArrayList<>();
+
 					currentSatellitePawList.add(pawData);
 					pawMap.put(newSatelliteName, currentSatellitePawList);
+					PlatformActivityWindowDAO.logger.debug("pawMap is empty for  newSatelliteName:"+pawMap.get(newSatelliteName));
+
 				}
+				PlatformActivityWindowDAO.logger.debug("pawMap :"+pawMap);
+
 //					currentSatelliteName = newSatelliteName;
 //					pawMap.put(currentSatelliteName, currentSatellitePawList);
 //					currentSatellitePawList = new ArrayList<>();

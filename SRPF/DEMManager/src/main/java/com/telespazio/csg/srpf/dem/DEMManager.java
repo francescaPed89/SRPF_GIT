@@ -51,7 +51,7 @@ import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
  */
 public class DEMManager
 {
-	static final Logger logger = LogManager.getLogger(DEMManager.class.getName());
+	//static final Logger logger = LogManager.getLogger(DEMManager.class.getName());
 
     // static final Logger logger =
     // LogManager.getLogger(DEMManager.class.getName());
@@ -142,10 +142,15 @@ public class DEMManager
          *
          * return 0; }
          */
+       // this.demMap.clear();
+        DEMRect rectangle = null;
+        if(!this.demMap.isEmpty())
+        {
+            rectangle = this.demMap.get(hdf5FilePath);
+//          logger.debug("rectangle for getELEVATION "+rectangle);
 
-        DEMRect rectangle = this.demMap.get(hdf5FilePath);
-//        logger.debug("rectangle for getELEVATION "+rectangle);
-
+        }
+  
         if (rectangle == null)
         {
             // logger.info("Adding new rectangle to dem map");
@@ -158,19 +163,19 @@ public class DEMManager
                 // logger.error("Unable to create rectangle for file: " +
                 // hdf5FilePath + " fake rectangle returning zeros will be added
                 // to DEMManager" );
-                this.tracer.minor(EventType.RESOURCE_EVENT, ProbableCause.OUT_OF_MEMORY, "Unable to create rectangle for file: " + hdf5FilePath + " fake rectangle returning zeros will be added to DEMManager");
+            	//logger.debug(EventType.RESOURCE_EVENT, ProbableCause.OUT_OF_MEMORY, "Unable to create rectangle for file: " + hdf5FilePath + " fake rectangle returning zeros will be added to DEMManager");
                 // logger.error(e.getMessage());
                 // rectangle = new DEMRect();
                 // rectangle.setFilePath(hdf5FilePath);
                 rectangle = null;
                 elevation = 0;
-            	DateUtils.getLogInfo(e, DEMManager.logger);
+            //	DateUtils.getLogInfo(e, logger);
 
             } // end catch
 
             if ((this.demMap.size() >= this.maxNumberofRectInMemory) && (rectangle != null))
             {
-                logger.warn("too many rectangle in memory: empting the memory map");
+               // logger.warn("too many rectangle in memory: empting the memory map");
                 this.demMap.clear();
             } // end if
 
@@ -190,8 +195,8 @@ public class DEMManager
         } // end try
         catch (Exception e)
         {
-            logger.error("elevation Exception e "+e);
-        	DateUtils.getLogInfo(e, DEMManager.logger);
+//            logger.error("elevation Exception e "+e);
+//        	DateUtils.getLogInfo(e, logger);
 
 
             // this should never happen

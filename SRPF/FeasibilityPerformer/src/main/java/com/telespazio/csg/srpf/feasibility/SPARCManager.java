@@ -1083,127 +1083,147 @@ public class SPARCManager
 	protected void insertCornersToDTOINfo(Document doc, Element DTOInfoElement, DTO dto)
 
 	{
-		// mean elevation
-		double meanElevation = dto.getMeanElevation();
+		try
+		{
+			// Inserting early near
+			logger.debug("insertCornersToDTOINfo");
+			logger.debug("dto.getFirstCorner()"+dto.getFirstCorner());
+	
 
-		// Inserting early near
+			double[] corner = dto.getFirstCorner();
+			logger.debug("corner[0]" +corner[0]);
+			logger.debug("corner[1]" +corner[1]);
+			
+			int height = this.dem.getElevation(corner[0], corner[1]);
+			logger.debug("height" +height);
 
-		double[] corner = dto.getFirstCorner();
+			Element DTOEarlyNearCornerElement = doc.createElement(DTOEarlyNearCornerTagName);
+			Element latitudeElement = doc.createElement(LatitudeTagName);
+			Text text = doc.createTextNode("" + corner[0]);
+			/**
+			 * Inserting element
+			 */
+			latitudeElement.appendChild(text);
+			/**
+			 * Inserting element
+			 */
+			DTOEarlyNearCornerElement.appendChild(latitudeElement);
+			Element longitudeElement = doc.createElement(LongitudeTagName);
+			text = doc.createTextNode("" + corner[1]);
+			/**
+			 * Inserting element
+			 */
+			longitudeElement.appendChild(text);
+			DTOEarlyNearCornerElement.appendChild(longitudeElement);
+			Element heightElement = doc.createElement(HeightTagName);
+			text = doc.createTextNode("" + height);
+			heightElement.appendChild(text);
+			/**
+			 * Inserting element
+			 */
+			DTOEarlyNearCornerElement.appendChild(heightElement);
+			DTOInfoElement.appendChild(DTOEarlyNearCornerElement);
 
-		Element DTOEarlyNearCornerElement = doc.createElement(DTOEarlyNearCornerTagName);
-		Element latitudeElement = doc.createElement(LatitudeTagName);
-		Text text = doc.createTextNode("" + corner[0]);
-		/**
-		 * Inserting element
-		 */
-		latitudeElement.appendChild(text);
-		/**
-		 * Inserting element
-		 */
-		DTOEarlyNearCornerElement.appendChild(latitudeElement);
-		Element longitudeElement = doc.createElement(LongitudeTagName);
-		text = doc.createTextNode("" + corner[1]);
-		/**
-		 * Inserting element
-		 */
-		longitudeElement.appendChild(text);
-		DTOEarlyNearCornerElement.appendChild(longitudeElement);
-		Element heightElement = doc.createElement(HeightTagName);
-		text = doc.createTextNode("" + meanElevation);
-		heightElement.appendChild(text);
-		/**
-		 * Inserting element
-		 */
-		DTOEarlyNearCornerElement.appendChild(heightElement);
-		DTOInfoElement.appendChild(DTOEarlyNearCornerElement);
+			// inserting early FAR
+			logger.debug("corner1 processed");
 
-		// inserting early FAR
+			corner = dto.getSecondCorner();
+			height = this.dem.getElevation(corner[0], corner[1]);
 
-		corner = dto.getSecondCorner();
+			Element DTOEarlyFarCornerElement = doc.createElement(DTOEarlyFarCornerTagName);
+			latitudeElement = doc.createElement(LatitudeTagName);
+			text = doc.createTextNode("" + corner[0]);
+			latitudeElement.appendChild(text);
+			/**
+			 * Inserting element
+			 */
+			DTOEarlyFarCornerElement.appendChild(latitudeElement);
+			longitudeElement = doc.createElement(LongitudeTagName);
+			text = doc.createTextNode("" + corner[1]);
+			/**
+			 * Inserting element
+			 */
+			longitudeElement.appendChild(text);
+			DTOEarlyFarCornerElement.appendChild(longitudeElement);
+			heightElement = doc.createElement(HeightTagName);
+			text = doc.createTextNode("" + height);
+			/**
+			 * Inserting element
+			 */
+			heightElement.appendChild(text);
+			DTOEarlyFarCornerElement.appendChild(heightElement);
+			/**
+			 * Inserting element
+			 */
+			DTOInfoElement.appendChild(DTOEarlyFarCornerElement);
+			logger.debug("corner2 processed");
 
-		Element DTOEarlyFarCornerElement = doc.createElement(DTOEarlyFarCornerTagName);
-		latitudeElement = doc.createElement(LatitudeTagName);
-		text = doc.createTextNode("" + corner[0]);
-		latitudeElement.appendChild(text);
-		/**
-		 * Inserting element
-		 */
-		DTOEarlyFarCornerElement.appendChild(latitudeElement);
-		longitudeElement = doc.createElement(LongitudeTagName);
-		text = doc.createTextNode("" + corner[1]);
-		/**
-		 * Inserting element
-		 */
-		longitudeElement.appendChild(text);
-		DTOEarlyFarCornerElement.appendChild(longitudeElement);
-		heightElement = doc.createElement(HeightTagName);
-		text = doc.createTextNode("" + meanElevation);
-		/**
-		 * Inserting element
-		 */
-		heightElement.appendChild(text);
-		DTOEarlyFarCornerElement.appendChild(heightElement);
-		/**
-		 * Inserting element
-		 */
-		DTOInfoElement.appendChild(DTOEarlyFarCornerElement);
+			// Inserting Late near
+			corner = dto.getFourtCorner();
+			height = this.dem.getElevation(corner[0], corner[1]);
 
-		// Inserting Late near
-		corner = dto.getFourtCorner();
+			Element DTOLateNearCornerElement = doc.createElement(DTOLateNearCornerTagName);
+			latitudeElement = doc.createElement(LatitudeTagName);
+			text = doc.createTextNode("" + corner[0]);
+			/**
+			 * Inserting element
+			 */
+			latitudeElement.appendChild(text);
+			DTOLateNearCornerElement.appendChild(latitudeElement);
+			longitudeElement = doc.createElement(LongitudeTagName);
+			text = doc.createTextNode("" + corner[1]);
+			/**
+			 * Inserting element
+			 */
+			longitudeElement.appendChild(text);
+			DTOLateNearCornerElement.appendChild(longitudeElement);
+			heightElement = doc.createElement(HeightTagName);
+			text = doc.createTextNode("" + height);
+			/**
+			 * Inserting element
+			 */
+			heightElement.appendChild(text);
+			DTOLateNearCornerElement.appendChild(heightElement);
+			/**
+			 * Inserting element
+			 */
+			DTOInfoElement.appendChild(DTOLateNearCornerElement);
+			logger.debug("corner3 processed");
 
-		Element DTOLateNearCornerElement = doc.createElement(DTOLateNearCornerTagName);
-		latitudeElement = doc.createElement(LatitudeTagName);
-		text = doc.createTextNode("" + corner[0]);
-		/**
-		 * Inserting element
-		 */
-		latitudeElement.appendChild(text);
-		DTOLateNearCornerElement.appendChild(latitudeElement);
-		longitudeElement = doc.createElement(LongitudeTagName);
-		text = doc.createTextNode("" + corner[1]);
-		/**
-		 * Inserting element
-		 */
-		longitudeElement.appendChild(text);
-		DTOLateNearCornerElement.appendChild(longitudeElement);
-		heightElement = doc.createElement(HeightTagName);
-		text = doc.createTextNode("" + meanElevation);
-		/**
-		 * Inserting element
-		 */
-		heightElement.appendChild(text);
-		DTOLateNearCornerElement.appendChild(heightElement);
-		/**
-		 * Inserting element
-		 */
-		DTOInfoElement.appendChild(DTOLateNearCornerElement);
+			// Inserting Late Far
+			corner = dto.getThirdCorner();
+			height = this.dem.getElevation(corner[0], corner[1]);
 
-		// Inserting Late Far
-		corner = dto.getThirdCorner();
+			Element DTOLateFarCornerElement = doc.createElement(DTOLateFarCornerTagName);
+			latitudeElement = doc.createElement(LatitudeTagName);
+			text = doc.createTextNode("" + corner[0]);
+			latitudeElement.appendChild(text);
+			DTOLateFarCornerElement.appendChild(latitudeElement);
+			longitudeElement = doc.createElement(LongitudeTagName);
+			text = doc.createTextNode("" + corner[1]);
+			/**
+			 * Inserting element
+			 */
+			longitudeElement.appendChild(text);
+			DTOLateFarCornerElement.appendChild(longitudeElement);
+			heightElement = doc.createElement(HeightTagName);
+			text = doc.createTextNode("" + height);
+			/**
+			 * Inserting element
+			 */
+			heightElement.appendChild(text);
+			DTOLateFarCornerElement.appendChild(heightElement);
+			/**
+			 * Inserting element
+			 */
+			DTOInfoElement.appendChild(DTOLateFarCornerElement);
+			logger.debug("corner4 processed");
 
-		Element DTOLateFarCornerElement = doc.createElement(DTOLateFarCornerTagName);
-		latitudeElement = doc.createElement(LatitudeTagName);
-		text = doc.createTextNode("" + corner[0]);
-		latitudeElement.appendChild(text);
-		DTOLateFarCornerElement.appendChild(latitudeElement);
-		longitudeElement = doc.createElement(LongitudeTagName);
-		text = doc.createTextNode("" + corner[1]);
-		/**
-		 * Inserting element
-		 */
-		longitudeElement.appendChild(text);
-		DTOLateFarCornerElement.appendChild(longitudeElement);
-		heightElement = doc.createElement(HeightTagName);
-		text = doc.createTextNode("" + meanElevation);
-		/**
-		 * Inserting element
-		 */
-		heightElement.appendChild(text);
-		DTOLateFarCornerElement.appendChild(heightElement);
-		/**
-		 * Inserting element
-		 */
-		DTOInfoElement.appendChild(DTOLateFarCornerElement);
+		}
+		catch(Exception e)
+		{
+			DateUtils.getLogInfo(e, logger);
+		}
 
 	}// end method
 

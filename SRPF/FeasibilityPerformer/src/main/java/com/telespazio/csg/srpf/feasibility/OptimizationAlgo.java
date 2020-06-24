@@ -526,6 +526,8 @@ public class OptimizationAlgo implements OptimizationAlgoInterface
             String univGridPintKey = this.gridPointList.get(this.gridPointList.size() - 1); //
             GridPoint p = fromStringToGridPoint(univGridPintKey,this.gridPointMap);
             logger.debug("GRID POINT LAST POSITION "+p);
+            logger.debug("GRID POINT isCentroid "+p.isCentroid());
+
             if (p.isCentroid())
             {
                 if (p.isInternal())
@@ -595,7 +597,7 @@ public class OptimizationAlgo implements OptimizationAlgoInterface
              */
             currentOuterIter.setId(this.outerIterationList.size() + 1);
             this.outerIterationList.add(currentOuterIter);
-            this.logger.trace("MODIFICA adding to the solutions's family : " + currentOuterIter.toString());
+            this.logger.debug("MODIFICA adding to the solutions's family : " + currentOuterIter.toString());
             
 
         } // end for
@@ -642,6 +644,7 @@ public class OptimizationAlgo implements OptimizationAlgoInterface
     private OuterOptimizationLoopIteration performOuterIteration()
     {
 
+    	//TODO : 23062020 vedere con Ric
         /**
          * retval
          */
@@ -1167,12 +1170,11 @@ public class OptimizationAlgo implements OptimizationAlgoInterface
     private AcqReq checkIfSingleAcquirableSpotLightCase() throws Exception
     {
         AcqReq acq = new AcqReq();
-        logger.debug("Modifica 14.11 : stripList size "+this.stripList.size());
-        logger.debug("Modifica 14.11 : versus  "+this.gridPointList.size());
-
+        
         for (Strip s : this.stripList)
         {
             logger.debug("Modifica 14.11 : strip accessList cardinality :" +s.getAccessList().size());
+            logger.debug("Modifica 14.11 : strip accessList cardinality :" +s.getAccessList());
 
             SpotLightDTO dto;
             GridPoint center = null;

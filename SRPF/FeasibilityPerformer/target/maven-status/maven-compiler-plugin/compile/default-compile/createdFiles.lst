@@ -34,6 +34,7 @@ com\telespazio\csg\srpf\feasibility\SparcBeamDB.class
 com\telespazio\csg\srpf\feasibility\SpotLightDTO.class
 com\telespazio\csg\srpf\feasibility\OptimizationAlgoInterface.class
 com\telespazio\csg\srpf\feasibility\SPARCManager.class
+com\telespazio\csg\srpf\feasibility\refiner\FeasibilityRefiner$1.class
 com\telespazio\csg\srpf\feasibility\InnerOptimizationLoopIterator.class
 com\telespazio\csg\srpf\feasibility\OptimizationAlgo.class
 com\telespazio\csg\srpf\feasibility\StripWrapper.class

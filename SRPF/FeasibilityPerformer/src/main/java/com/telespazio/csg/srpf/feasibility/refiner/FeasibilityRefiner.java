@@ -32,8 +32,13 @@ package com.telespazio.csg.srpf.feasibility.refiner;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -64,13 +69,13 @@ import com.telespazio.csg.srpf.dataManager.bean.SatelliteBean;
 import com.telespazio.csg.srpf.dataManager.bean.SatellitePassBean;
 import com.telespazio.csg.srpf.dataManager.bo.PlatformActivityWindowBO;
 import com.telespazio.csg.srpf.dataManager.bo.SatelliteBO;
-import com.telespazio.csg.srpf.dataManager.dao.ConfigurationDao;
 import com.telespazio.csg.srpf.dataManager.inMemoryOrbitalData.EphemeridInMemoryDB;
 import com.telespazio.csg.srpf.dem.DEMManager;
 import com.telespazio.csg.srpf.feasibility.Access;
 import com.telespazio.csg.srpf.feasibility.DTO;
 import com.telespazio.csg.srpf.feasibility.FeasibilityConstants;
 import com.telespazio.csg.srpf.feasibility.FeasibilityException;
+import com.telespazio.csg.srpf.feasibility.FeasibilityPerformer;
 import com.telespazio.csg.srpf.feasibility.GridException;
 import com.telespazio.csg.srpf.feasibility.GridPoint;
 import com.telespazio.csg.srpf.feasibility.Satellite;
@@ -227,6 +232,8 @@ public class FeasibilityRefiner {
 
 		String analysePrResponse = "";
 		logger.debug("Performing refinement");
+		
+		//TODO: mettere path orbitali
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		DocumentBuilder db;
@@ -237,7 +244,18 @@ public class FeasibilityRefiner {
 		this.tracer.debug("Loaded document " + prlistPath);
 		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Schema schema = factory.newSchema(new File(this.xsdPath));
-		schema.newValidator().validate(new DOMSource(this.doc));
+		try
+		{
+			schema.newValidator().validate(new DOMSource(this.doc));
+		}
+		catch(SAXException saxEx)
+		{
+			logger.error("Exception in validate document_saxException: "+saxEx);
+		}
+		catch(IOException ex)
+		{
+			logger.error("Exception in validate document_IOException: "+ex);
+		}
 		logger.debug("Parsed valid document");
 
 		// this.tracer.debug("============Renaming doc");
@@ -245,24 +263,18 @@ public class FeasibilityRefiner {
 
 		this.doc.renameNode(root, root.getNamespaceURI(), FeasibilityConstants.AnalysePRListResponseTagName);
 		// this.tracer.debug("================Renamed doc");
-		logger.debug("after doc.renameNode");
 
 		// evaluating response path
 		analysePrResponse = evaluateResponseName(prlistPath);
-		logger.debug("after analysePrResponse");
 
 		// build map
 		buildMap();
-		logger.debug("after buildMap");
-		logger.debug(" before doRefinement");
 
 		// do refine
 		doRefinement();
-		logger.debug(" after doRefinement");
 
 		// update xml
 		updateXML();
-		logger.debug("after updateXML");
 
 		this.tracer.debug("writing request xml...");
 		// dump response to xml file
@@ -479,7 +491,7 @@ public class FeasibilityRefiner {
 			 * FeasibilityException("Error during refinement: " + e.getMessage()); }
 			 */
 
-			RefinementSparcManager rspm = new RefinementSparcManager(this.getPrArMap(), 0, this.workingDir);
+			RefinementSparcManager rspm = new RefinementSparcManager(this.getPrArMap(), 0, this.workingDir,this.dem);
 
 			this.prArMap = rspm.refine();
 
@@ -672,8 +684,7 @@ public class FeasibilityRefiner {
 	 * @throws FeasibilityException
 	 */
 	protected void evaluateNewDTOparameters(DTO dto) throws FeasibilityException {
-		logger.debug("Evaluating DTO parameters for 1 corner: " + dto.getFirstCorner());
-		logger.debug("Evaluating DTO parameters for 4 corner: " + dto.getFourtCorner());
+
 
 		String satName = dto.getSatName();
 		Satellite s = this.satelliteMap.get(satName);
@@ -683,15 +694,51 @@ public class FeasibilityRefiner {
 			// just log
 			throw new FeasibilityException("Requested refinement for DTO with unknown satellite " + satName);
 		}
-		// evaluating corner
-		double[] startLLH = dto.getFirstCorner();
-		startLLH[2] = this.dem.getElevation(startLLH[0], startLLH[1]);
-		GridPoint p1 = new GridPoint(1, startLLH);
-		// evaluating corner
-		double[] stopLLH = dto.getFourtCorner();
-		stopLLH[2] = this.dem.getElevation(stopLLH[0], stopLLH[1]);
+		// evaluating 1 corner
+		double[] firstCorner = dto.getFirstCorner();
+		firstCorner[2] = this.dem.getElevation(firstCorner[0], firstCorner[1]);
+		
+		// evaluating 2 corner
+		double[] secondCorner = dto.getSecondCorner();
+		secondCorner[2] = this.dem.getElevation(secondCorner[0], secondCorner[1]);
+		
+		// evaluating 3 corner
+		double[] thirdCorner = dto.getThirdCorner();
+		thirdCorner[2] = this.dem.getElevation(thirdCorner[0], thirdCorner[1]);
+		
+		// evaluating 4 corner
+		double[] fourtCorner = dto.getFourtCorner();
+		fourtCorner[2] = this.dem.getElevation(fourtCorner[0], fourtCorner[1]);
+		
+		logger.debug("Evaluating DTO parameters for 1 corner: " + firstCorner[0]+","+firstCorner[1]+","+firstCorner[2]+".");
+		logger.debug("Evaluating DTO parameters for 2 corner: " + secondCorner[0]+","+secondCorner[1]+","+secondCorner[2]+".");
+		logger.debug("Evaluating DTO parameters for 3 corner: " + thirdCorner[0]+","+thirdCorner[1]+","+thirdCorner[2]+".");
+		logger.debug("Evaluating DTO parameters for 4 corner: " + fourtCorner[0]+","+fourtCorner[1]+","+fourtCorner[2]+".");
+		
+		double[] midLowerStopLLH = new double[3];
+		midLowerStopLLH[0] =(firstCorner[0]+ secondCorner [0])/2;
+		midLowerStopLLH[1] =(firstCorner[1]+ secondCorner [1])/2;
+		midLowerStopLLH[2] =(firstCorner[2]+ secondCorner [2])/2;
 
-		GridPoint p2 = new GridPoint(2, stopLLH);
+		logger.debug("creating mid upper gridPoint: " + midLowerStopLLH[0]+","+midLowerStopLLH[1]+","+midLowerStopLLH[2]+".");
+
+		double[] midUpperStopLLH = new double[3];
+		midUpperStopLLH[0] =(thirdCorner[0]+ fourtCorner [0])/2;
+		midUpperStopLLH[1] =(thirdCorner[1]+ fourtCorner [1])/2;
+		midUpperStopLLH[2] =(thirdCorner[2]+ fourtCorner [2])/2;
+ 
+		logger.debug("creating mid lower gridPoint: " + midUpperStopLLH[0]+","+midUpperStopLLH[1]+","+midUpperStopLLH[2]+".");
+
+		GridPoint p1 = new GridPoint(1, midLowerStopLLH);
+
+		GridPoint p2 = new GridPoint(2, midUpperStopLLH);
+		
+//		GridPoint p4 = new GridPoint(4, stopLLH4);
+//
+//		GridPoint p3 = new GridPoint(3, stopLLH2);
+		
+
+		
 		// Retrieving epochs
 		double startingEpochInterval = dto.getStartTime() - FeasibilityConstants.RefinementHalfInterval;
 		double endingEpochInterval = dto.getStopTime() + FeasibilityConstants.RefinementHalfInterval;
@@ -731,6 +778,10 @@ public class FeasibilityRefiner {
 		// evaluating access on points
 		gridPointList.add(p1);
 		gridPointList.add(p2);
+//		
+//		gridPointList.add(p3);
+//		gridPointList.add(p4);
+
 		evaluator.evaluateSatelliteAccesses(s, gridPointList, null);
 		logger.debug("ACCESSES DONE");
 
@@ -767,6 +818,7 @@ public class FeasibilityRefiner {
 		long trackNumber = 0;
 		// looping on accesses
 //		logger.debug("invoking dto.getDtoAccessList() BEFORE ADD ACCESSES OF SAT  :" + dto.getDtoAccessList());
+		List<Access> allValidAccesses = new ArrayList<Access>();
 
 		for (Access a : sat.getAccessList()) {
 			//logger.debug("invoking daccess a:" + a);
@@ -800,10 +852,9 @@ public class FeasibilityRefiner {
 				 */
 				logger.debug("dto.sarBeamName :"+dto.sarBeamName );
 				logger.debug("a.getBeamId() :" +a.getBeamId());
-				logger.debug("adding access to dto:" );
-
-				dto.getDtoAccessList().add(a);
-				
+				logger.debug("adding access to dto:"+a.getAccessTime() );
+				//dto.getDtoAccessList().add(a);
+				allValidAccesses.add(a);
 			}
 			else
 			{
@@ -813,6 +864,45 @@ public class FeasibilityRefiner {
 
 		} // end for
 
+		
+		//check, for every valid access if the distance with the others is at least 1000 ms
+		if(allValidAccesses.size()>1)
+		{
+			for(int i=0;i<allValidAccesses.size();i++)
+			{
+				logger.debug(allValidAccesses.get(i).getAccessTime());
+			}
+			logger.debug("ordering accesses...");
+			sortAccessesByStartTime(allValidAccesses);
+			for(int i=0;i<allValidAccesses.size();i++)
+			{
+				logger.debug(allValidAccesses.get(i).getAccessTime());
+			}
+			Access firstAccess = allValidAccesses.get(0);
+			Access lastAccess = allValidAccesses.get(allValidAccesses.size()-1);
+			LocalDateTime datefirstAccess = DateUtils.fromCSKDateToDateTime(firstAccess.getAccessTime());
+			LocalDateTime datelastAccess = DateUtils.fromCSKDateToDateTime(lastAccess.getAccessTime());
+	        Duration duration = Duration.between(datefirstAccess, datelastAccess);
+
+			logger.debug("firstAccess: "+datefirstAccess);
+			logger.debug("lastAccess: "+datelastAccess);
+			logger.debug("diff betweeen first and last access (ms):"+duration.toMillis());
+			if(duration.toMillis()>100)
+			{
+				for(int i=0;i<allValidAccesses.size();i++)
+				{
+					dto.getDtoAccessList().add(allValidAccesses.get(i));
+				}
+				logger.debug("startTime before accesses manipulation"+startTime);
+				logger.debug("stopTime before accesses manipulation"+stopTime);
+
+				startTime = firstAccess.getAccessTime();
+				stopTime = lastAccess.getAccessTime();
+				logger.debug("startTime after accesses manipulation"+startTime);
+				logger.debug("stopTime after accesses manipulation"+stopTime);
+
+			}
+		}
 		if(dto.getDtoAccessList().size()==0)
 		{
 			logger.debug("set dto to not refinable because getDtoAccessList is empty:");
@@ -822,7 +912,7 @@ public class FeasibilityRefiner {
 		{
 			try {
 				
-
+				
 				if ((startTime != 0) && (stopTime != 0) && ((stopTime - startTime) > 0)) {
 					// the dto could be refined
 					dto.setRefinable(true);
@@ -880,6 +970,10 @@ public class FeasibilityRefiner {
 							+ dto.isRefinable());
 
 				} // end else
+				
+
+				logger.debug("startTime after accesses manipulation"+dto.getStartTime());
+				logger.debug("stopTime after accesses manipulation"+dto.getStopTime());
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -890,6 +984,34 @@ public class FeasibilityRefiner {
 
 	}// end method
 //
+	
+
+	/**
+	 * Sort tasks by start time.
+	 *
+	 * @param downloadsAssociated the downloads associated
+	 */
+	public static void sortAccessesByStartTime(List<Access> allAccesses) {
+		// create a new Comparator
+		Collections.sort(allAccesses, new Comparator<Access>() {
+
+			@Override
+			/*
+			 * given two tasks
+			 * 
+			 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+			 */
+			public int compare(Access access1, Access access2) {
+				// compare and sort them by startTime
+				
+				LocalDateTime date1 = DateUtils.fromCSKDateToDateTime(access1.getAccessTime());
+				LocalDateTime date2 = DateUtils.fromCSKDateToDateTime(access2.getAccessTime());
+
+				return date1.compareTo(date2);
+			}
+		});
+	}
+	
 //	private BeamBean checkForBeamName(String beamName, List<BeamBean> currentBeamList) {
 //		// TODO Auto-generated method stub
 //		BeamBean returnedBeam = null;

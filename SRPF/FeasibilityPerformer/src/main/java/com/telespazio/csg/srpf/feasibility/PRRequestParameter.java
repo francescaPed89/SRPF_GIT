@@ -643,7 +643,7 @@ public class PRRequestParameter implements Cloneable
 			 */
 			allowedSatelliteList = this.allowedSatelliteListCSG;
 		}
-
+		logger.debug("allowedSatelliteList " + allowedSatelliteList);
 		/**
 		 * Check if the name of satellite is inside the list
 		 */
@@ -689,11 +689,16 @@ public class PRRequestParameter implements Cloneable
 		BeamBean beam;
 		for (int i = 0; i < satBeams.size(); i++) {
 			beam = satBeams.get(i);
+			logger.debug("23062020 check for beam "+beam);
+			logger.debug("23062020 allowedBeamList "+allowedBeamList);
+
 			/**
 			 * For each beam in satlist beam check if the name is in the requested beam and
 			 * if so add to the list of valid beam
 			 */
 			if (checkIfStringIsInlist(beam.getBeamName(), allowedBeamList, true)) {
+				logger.debug("23062020 beam added. ");
+
 				beams.add(beam);
 			}
 
@@ -723,7 +728,7 @@ public class PRRequestParameter implements Cloneable
 	 * @param s
 	 * @return true if satellite has beam belonging the min / max look angle
 	 *         required in The PR.
-	 */
+  */
 	private boolean checkForMinMaxLookAngle(Satellite s) {
 		/**
 		 * Flag to be reruned
@@ -798,21 +803,16 @@ public class PRRequestParameter implements Cloneable
 						|| ((nearAngle <= MinLookAngle) && (farAngle >= MaxLookAngle))) {
 					alloweBeamList.add(b);
 				}
-				
-				/*COME ERA 
-				 * 				if (((nearAngle >= MinLookAngle) && (nearAngle <= MaxLookAngle))
-						|| ((farAngle >= MinLookAngle) && (farAngle <= MaxLookAngle))
-						|| ((nearAngle <= MinLookAngle) && (farAngle >= MaxLookAngle))) {
-					alloweBeamList.add(b);
-				}
-				
-				
-				COME E' PER NOI :
-								if (((nearAngle >= MinLookAngle) && (nearAngle <= MaxLookAngle))
-						&& ((farAngle >= MinLookAngle) && (farAngle <= MaxLookAngle))
-						) {
-					alloweBeamList.add(b);
-				}
+
+				/*
+				 * COME ERA if (((nearAngle >= MinLookAngle) && (nearAngle <= MaxLookAngle)) ||
+				 * ((farAngle >= MinLookAngle) && (farAngle <= MaxLookAngle)) || ((nearAngle <=
+				 * MinLookAngle) && (farAngle >= MaxLookAngle))) { alloweBeamList.add(b); }
+				 * 
+				 * 
+				 * COME E' PER NOI : if (((nearAngle >= MinLookAngle) && (nearAngle <=
+				 * MaxLookAngle)) && ((farAngle >= MinLookAngle) && (farAngle <= MaxLookAngle))
+				 * ) { alloweBeamList.add(b); }
 				 * 
 				 */
 			} // end if
@@ -903,23 +903,22 @@ public class PRRequestParameter implements Cloneable
 																			// meno
 	}// end method
 
-	  public static void findLocalPath() {
-	        try {
-	            String canonicalPath = new File(".").getCanonicalPath();
-	            logger.debug("Current directory path using canonical path method :- " + canonicalPath);
-	 
-	            String usingSystemProperty = System.getProperty("user.dir");
-	            logger.debug("Current directory path using system property:- " + usingSystemProperty);
-	 
-	        } catch (IOException e) {
-	        	logger.debug("IOException Occured" + e.getMessage());
-	        }
-	    }
-	 
-	  
+	public static void findLocalPath() {
+		try {
+			String canonicalPath = new File(".").getCanonicalPath();
+			logger.debug("Current directory path using canonical path method :- " + canonicalPath);
+
+			String usingSystemProperty = System.getProperty("user.dir");
+			logger.debug("Current directory path using system property:- " + usingSystemProperty);
+
+		} catch (IOException e) {
+			logger.debug("IOException Occured" + e.getMessage());
+		}
+	}
+
 	public static String getSRPFVersion() throws IOException, XmlPullParserException {
-		
-		return "2.2.9p";
+
+		return "2.2.12p";
 //		findLocalPath();
 //		String version = null;
 //		MavenXpp3Reader reader = new MavenXpp3Reader();
@@ -967,22 +966,22 @@ public class PRRequestParameter implements Cloneable
 
 			logger.info("SRPF version :  " + getSRPFVersion());
 			try {
-				String value = PropertiesReader.getInstance().getProperty(FeasibilityConstants.SPARC_INSTALLATION_DIR_CONF_KEY);
+				String value = PropertiesReader.getInstance()
+						.getProperty(FeasibilityConstants.SPARC_INSTALLATION_DIR_CONF_KEY);
 
 				String checkSumPath = value + "/md5sum.txt";
-				logger.debug("SPARC CHECKSUM PATH : "+checkSumPath);
+				logger.debug("SPARC CHECKSUM PATH : " + checkSumPath);
 				File file = new File(checkSumPath);
 
 				BufferedReader br = new BufferedReader(new FileReader(file));
 
 				String st;
 				while ((st = br.readLine()) != null) {
-					
-					//  SPARC_V4.1.tar.gz
-					if(st.contains("SPARC"))
-					{
+
+					// SPARC_V4.1.tar.gz
+					if (st.contains("SPARC")) {
 						String sparcVersion = st.substring(st.indexOf("SPARC"), st.length());
-						logger.info("SPARC VERSION : "+sparcVersion);
+						logger.info("SPARC VERSION : " + sparcVersion);
 					}
 				}
 				br.close();
@@ -1167,7 +1166,6 @@ public class PRRequestParameter implements Cloneable
 			e1.printStackTrace();
 			DateUtils.getLogInfo(e1, logger);
 
-			
 		}
 	} // RequestParameter constructor
 
@@ -1366,7 +1364,9 @@ public class PRRequestParameter implements Cloneable
 		List<String> currentList = getChildElementListText(constraints, FeasibilityConstants.SatelliteTagName,
 				FeasibilityConstants.SatelliteTagNameNS);
 		for (String satName : currentList) {
-			this.allowedSatelliteListCSK.add(satName);
+			if (!this.allowedSatelliteListCSK.contains(satName)) {
+				this.allowedSatelliteListCSK.add(satName);
+			}
 		}
 
 		/**
@@ -1374,9 +1374,15 @@ public class PRRequestParameter implements Cloneable
 		 */
 		currentList = getChildElementListText(constraints, FeasibilityConstants.BeamIdTagName,
 				FeasibilityConstants.BeamIdTagNameNS);
+		logger.debug("beamId------------------------" + currentList);
+		logger.debug("this.allowedBeamListCSK------------------------" + this.allowedBeamListCSK);
+
 		for (String beamName : currentList) {
+			logger.debug("beam name------------------------" + beamName);
+
 			this.allowedBeamListCSK.add(beamName);
 		}
+		logger.debug("this.allowedBeamListCSK------------------------" + this.allowedBeamListCSK);
 
 	}// end parseCSKCOnstraints
 
@@ -1451,7 +1457,9 @@ public class PRRequestParameter implements Cloneable
 		List<String> currentList = getChildElementListText(constraints, FeasibilityConstants.SatelliteTagName,
 				FeasibilityConstants.SatelliteTagNameNS);
 		for (String satName : currentList) {
-			this.allowedSatelliteListCSG.add(satName);
+			if (!this.allowedSatelliteListCSG.contains(satName)) {
+				this.allowedSatelliteListCSG.add(satName);
+			}
 		}
 
 		/**
@@ -1460,9 +1468,17 @@ public class PRRequestParameter implements Cloneable
 
 		currentList = getChildElementListText(constraints, FeasibilityConstants.BeamIdTagName,
 				FeasibilityConstants.BeamIdTagNameNS);
+
+		logger.debug("beamId------------------------" + currentList);
+		logger.debug("this.allowedBeamListCSG------------------------" + this.allowedBeamListCSG);
+
 		for (String beamName : currentList) {
+			logger.debug("beam name------------------------" + beamName);
+
 			this.allowedBeamListCSG.add(beamName);
 		}
+		logger.debug("this.allowedBeamListCSG------------------------" + this.allowedBeamListCSG);
+
 	} // end parseCSGConstraints
 
 	/**
@@ -1486,8 +1502,8 @@ public class PRRequestParameter implements Cloneable
 					.equals(di2sElement.getFirstChild().getTextContent());
 
 		} // end if
-		
-		logger.debug("this.di2sAvailabilityFlag "+this.di2sAvailabilityFlag);
+
+		logger.debug("this.di2sAvailabilityFlag " + this.di2sAvailabilityFlag);
 
 		if (this.di2sAvailabilityFlag) {
 			logger.debug("retrieveMinimumAoI ");
@@ -1521,16 +1537,16 @@ public class PRRequestParameter implements Cloneable
 			 * Searching for MinAoII
 			 */
 			currentElement = (Element) addParamList.item(i);
-			
-			logger.debug("there are addParams?"+currentElement);
+
+			logger.debug("there are addParams?" + currentElement);
 			logger.debug(getChildElementText(currentElement, FeasibilityConstants.AdditionalProgrammingNameTagName,
-			FeasibilityConstants.AdditionalProgrammingNameTagNameNS));
-			if (FeasibilityConstants.MinimumAoIValue
-					.equalsIgnoreCase(getChildElementText(currentElement, FeasibilityConstants.AdditionalProgrammingNameTagName,
+					FeasibilityConstants.AdditionalProgrammingNameTagNameNS));
+			if (FeasibilityConstants.MinimumAoIValue.equalsIgnoreCase(
+					getChildElementText(currentElement, FeasibilityConstants.AdditionalProgrammingNameTagName,
 							FeasibilityConstants.AdditionalProgrammingNameTagNameNS))) {
 				this.minimumAoI = getChildElementText(currentElement, FeasibilityConstants.PosListTagName,
 						FeasibilityConstants.PosListTagNameNS);
-				logger.debug("this.minimumAoI "+this.minimumAoI);
+				logger.debug("this.minimumAoI " + this.minimumAoI);
 
 				/**
 				 * MinAoii exists so it doesn'n match with target area
@@ -1540,13 +1556,12 @@ public class PRRequestParameter implements Cloneable
 			}
 
 		} // end for
-		
-		if (!foundMinAOI)
-		{
+
+		if (!foundMinAOI) {
 			this.minimumAoICoincidentWithAoI = true;
 
 		}
-		
+
 	}// end retrieveMinimumAoI
 
 	/**
@@ -2328,7 +2343,7 @@ public class PRRequestParameter implements Cloneable
 		 * if empty list true by default
 		 */
 		boolean retval = true;
-
+		logger.debug("toLowerCase " + toLowerCase);
 		for (String s : list) {
 
 			retval = false;
@@ -2337,10 +2352,14 @@ public class PRRequestParameter implements Cloneable
 			 */
 			if (toLowerCase) {
 				if (element.toLowerCase().equals(s.toLowerCase())) {
+					logger.debug("same beam toLowerCase ");
+
 					return true;
 				}
 			} else {
 				if (element.equals(s)) {
+					logger.debug("same beam  ");
+
 					return true;
 				}
 			}

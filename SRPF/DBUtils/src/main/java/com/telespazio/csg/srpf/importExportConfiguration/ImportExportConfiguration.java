@@ -78,7 +78,7 @@ public class ImportExportConfiguration
             {
                 // update
             	/*
-            	 * //MODIFICA FRA 2.2.9p: prima era 
+            	 * //MODIFICA FRA 2.2.12p: prima era 
             	 *                 configurationBO.updateSensorModesConfiguration(filePath);
 					ora è updateSensorModesConfiguration2
             	 */

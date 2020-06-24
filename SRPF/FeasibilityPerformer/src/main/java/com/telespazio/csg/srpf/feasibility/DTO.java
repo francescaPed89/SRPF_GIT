@@ -1815,6 +1815,8 @@ public class DTO implements Cloneable
 		boolean retval = false;
 
 		PlatformActivityWindowBean currentPaw;
+logger.debug("PAW_Management : check for sat : "+this.sat.getMissionName());
+logger.debug("PAW_Management : check for sat : "+this.sat.getName());
 
 		/**
 		 * Satellite paw list
@@ -1825,12 +1827,15 @@ public class DTO implements Cloneable
 		double pawStop;
 
 		for (int i = 0; i < pawList.size(); i++) {
+
 			/**
 			 * For each paw in list
 			 *
 			 * check is the dto is inside paw
 			 */
 			currentPaw = pawList.get(i);
+			logger.debug("PAW_Management : check paw : "+currentPaw);
+
 			pawStart = currentPaw.getActivityStartTime();
 			pawStop = currentPaw.getActivityStopTime();
 

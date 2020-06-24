@@ -864,7 +864,18 @@ public class FeasibilityPerformer
 		 * validating doc against schema
 		 */
 		Schema schema = factory.newSchema(new File(this.xsdPath));
-		schema.newValidator().validate(new DOMSource(this.doc));
+		try
+		{
+			schema.newValidator().validate(new DOMSource(this.doc));
+		}
+		catch(SAXException saxEx)
+		{
+			FeasibilityPerformer.logger.error("Exception in validate document_saxException: "+saxEx);
+		}
+		catch(IOException ex)
+		{
+			FeasibilityPerformer.logger.error("Exception in validate document_IOException: "+ex);
+		}
 		FeasibilityPerformer.logger.debug("Parsed valid document");
 
 		/**
@@ -1381,7 +1392,8 @@ public class FeasibilityPerformer
 			 * Retrieve PAW
 			 */
 			ArrayList<PlatformActivityWindowBean> pawList = satPawMap.get(s.getName());
-
+			logger.debug("PAW_MANAGEMENT setting for satellite"+s.getName());
+			logger.debug("PAW_MANAGEMENT setting paw list "+pawList);
 			if (pawList == null) {
 				pawList = new ArrayList<>();
 			}
@@ -1576,6 +1588,11 @@ public class FeasibilityPerformer
 		FeasibilityPerformer.logger.debug("start validity : " + DateUtils.fromCSKDateToDateTime(startValidityTime));
 		FeasibilityPerformer.logger.debug("stop validity : " + DateUtils.fromCSKDateToDateTime(stopValidityTime));
 
+		/*
+		 * TODO mettere log path orbitali
+		 */
+		
+		
 		/**
 		 * Fille the satellite list
 		 */
@@ -2440,6 +2457,8 @@ public class FeasibilityPerformer
 			/**
 			 * Perform optimization algo
 			 */
+			logger.debug(" request.getRequestedOrbitDirection() " + request.getRequestedOrbitDirection());
+
 			if (request.getRequestedOrbitDirection() == FeasibilityConstants.AnyOrbitDirection) {
 				/**
 				 * Case any direction

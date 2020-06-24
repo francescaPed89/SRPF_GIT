@@ -62,14 +62,14 @@ public class Access implements Comparable<Access>
     @Override
     public String toString()
     {
-//    	logger.debug("accessTime "+this.getAccessTime());
-//    	logger.debug("lookSide "+this.getLookSide());
-//    	logger.debug("orbitDirection "+this.getOrbitDirection());
-//    	logger.debug("orbitId "+this.getOrbitId());
-//    	logger.debug("satellitePos "+this.getSatellitePos());
-//    	logger.debug("satelliteVel "+this.getSatelliteVel());
-//    	logger.debug("orbitType "+this.getOrbitType());
-//    	logger.debug("beam "+this.getBeam());
+    	logger.debug("accessTime "+this.getAccessTime());
+    	logger.debug("lookSide "+this.getLookSide());
+    	logger.debug("orbitDirection "+this.getOrbitDirection());
+    	logger.debug("orbitId "+this.getOrbitId());
+    	logger.debug("satellitePos "+this.getSatellitePos());
+    	logger.debug("satelliteVel "+this.getSatelliteVel());
+    	logger.debug("orbitType "+this.getOrbitType());
+    	logger.debug("beam "+this.getBeam());
         return "" ;
     }
     public GridPoint getPoint() {
