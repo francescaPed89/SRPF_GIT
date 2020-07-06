@@ -266,8 +266,6 @@ public class AccessesEvaluator
             while ((i + 3) < epochListSize)
 
             {
-                // logger.debug("Run on epoch: " +i + " Gridpoint: " +
-                // currentPoint.getId());
 
                 this.s0 = epochList.get(i);
                 this.s1 = epochList.get(i + 1);
@@ -303,10 +301,6 @@ public class AccessesEvaluator
                         evaluateAccesses(currentPoint, satellite, i);
 
                     } // end if
-                    else
-                    {
-                        logger.debug( " isAbleToView = false!");
-                    }
 
                 }
                 i++;
@@ -364,6 +358,7 @@ public class AccessesEvaluator
                     angle = currentBeam.getNearOffNadir();
                     if (angle < this.minOffNadir)
                     {
+                    	logger.debug("update minOffNadir with beam "+currentBeam.getIdBeam() );
                         /**
                          * The angle is less
                          */
@@ -374,6 +369,8 @@ public class AccessesEvaluator
 
                     if (angle > this.maxOffNadir)
                     {
+                    	logger.debug("update maxOffNadir with beam "+currentBeam.getIdBeam() );
+
                         /**
                          * the angle is major
                          */
@@ -385,13 +382,18 @@ public class AccessesEvaluator
                     /**
                      * if current beam is the first of the list
                      */
+                	logger.debug("update maxOffNadir with beam "+currentBeam.getIdBeam() );
+                	logger.debug("update minOffNadir with beam "+currentBeam.getIdBeam() );
+
                     this.minOffNadir = currentBeam.getNearOffNadir();
                     this.maxOffNadir = currentBeam.getFarOffNadir();
                     isFirst = false;
-
                 }
 
             } // end for
+        	logger.debug("minOffNadir  "+this.minOffNadir );
+        	logger.debug("maxOffNadir  "+this.maxOffNadir );
+
         } // enf if
     }// end setMinMaxOffNadir
 
@@ -437,6 +439,7 @@ public class AccessesEvaluator
     protected void evaluateAccesses(GridPoint p, Satellite satellite, int startingPointWindowIndex)
 
     {
+    	logger.debug("evaluateAccesses for gridpoint "+p);
         /**
          * Access
          */
@@ -449,8 +452,8 @@ public class AccessesEvaluator
         double[] epochTimes =
         { this.s0.getEpoch(), this.s1.getEpoch(), this.s2.getEpoch(), this.s3.getEpoch() };
 
-        // double [] epochTimes =
-        // {DateTimeUtils.fromJulianDay(s0.getEpoch()),DateTimeUtils.fromJulianDay(s1.getEpoch()),DateTimeUtils.fromJulianDay(s2.getEpoch()),DateTimeUtils.fromJulianDay(s3.getEpoch())};
+//         double [] epochTimes =
+//         {DateTimeUtils.fromJulianDay(s0.getEpoch()),DateTimeUtils.fromJulianDay(s1.getEpoch()),DateTimeUtils.fromJulianDay(s2.getEpoch()),DateTimeUtils.fromJulianDay(s3.getEpoch())};
 
         /**
          * X,Y,Z,VX,VY,VZ vector of position and velocity componenets
@@ -474,9 +477,9 @@ public class AccessesEvaluator
         double[] e1ComponentAlongPS =
         { evaluateE1ComponentAlongPS(p, this.s0), this.dot1, this.dot2, evaluateE1ComponentAlongPS(p, this.s3) };
 
-        // logger.debug("Interpolating");
-        // PolynomialFunctionLagrangeForm polyE1ComponentAlongPS = new
-        // PolynomialFunctionLagrangeForm(epochTimes,e1ComponentAlongPS);
+         logger.debug("Interpolating");
+//         PolynomialFunctionLagrangeForm polyE1ComponentAlongPS = new
+//         PolynomialFunctionLagrangeForm(epochTimes,e1ComponentAlongPS);
 
         try
         {
@@ -521,7 +524,7 @@ public class AccessesEvaluator
 
             double absOffNadirAngle = Math.abs(offNadirAngle);
 
-            // logger.debug("absOffNadir " +absOffNadirAngle );
+            logger.debug("absOffNadir " +absOffNadirAngle );
 
             /**
              * If off nadir angle inside min e max is a possible access
@@ -529,10 +532,10 @@ public class AccessesEvaluator
             if ((absOffNadirAngle >= this.minOffNadir) && (absOffNadirAngle <= this.maxOffNadir))
             {
 
-//                logger.debug("Access time from : " + DateUtils.fromCSKDateToDateTime(epochTimes[1]) + " and " + DateUtils.fromCSKDateToDateTime(epochTimes[2]) + ":" + " " + accessTime + " " + DateUtils.fromCSKDateToDateTime(accessTime) + " elaspsed: " + (accessTime - epochTimes[1]) + " poly degree: " + polyE1ComponentAlongPS.degree() + " Valore a access time :" + polyE1ComponentAlongPS.value(accessTime));
-//                logger.debug("Poly: " + polyE1ComponentAlongPS.value(accessTime) + " " + polyE1ComponentAlongPS.value(epochTimes[1]) + " " + polyE1ComponentAlongPS.value(epochTimes[2]));
-//
-//                logger.debug(absOffNadirAngle + " angle in interval: " + minOffNadir + " : " + maxOffNadir + " e1comp: " + e1ComponentAlongPS);
+                logger.debug("Access time from : " + DateUtils.fromCSKDateToDateTime(epochTimes[1]) + " and " + DateUtils.fromCSKDateToDateTime(epochTimes[2]) + ":" + " " + accessTime + " " + DateUtils.fromCSKDateToDateTime(accessTime) + " elaspsed: " + (accessTime - epochTimes[1]) + " poly degree: " + polyE1ComponentAlongPS.degree() + " Valore a access time :" + polyE1ComponentAlongPS.value(accessTime));
+                logger.debug("Poly: " + polyE1ComponentAlongPS.value(accessTime) + " " + polyE1ComponentAlongPS.value(epochTimes[1]) + " " + polyE1ComponentAlongPS.value(epochTimes[2]));
+
+                logger.debug(absOffNadirAngle + " angle in interval: " + minOffNadir + " : " + maxOffNadir + " e1comp: " + e1ComponentAlongPS);
 
                 // subAccessesList = new ArrayList<Access>();
                 int lookSide = evaluateLookSide(satPosAtZeroDoppler, satVelAtZeroDoppler, p.getEcef());
@@ -541,12 +544,13 @@ public class AccessesEvaluator
                 // check if the satellite can look at that side
                 if (!satellite.checkLookSide(lookSide))
                 {
+                    logger.debug("different lookside, return.");
                     return;
                 }
 
                 List<BeamBean> beams = satellite.getBeams();
 
-                // logger.debug(" beamList size: " + beams.size());
+                logger.debug(" beamList size: " + beams.size());
 
                 BeamBean currentBeam = null;
 
@@ -554,9 +558,9 @@ public class AccessesEvaluator
                 {
                     currentBeam = beams.get(i);
 
-                    // //System.out.println(absOffNadirAngle + " >= " +
-                    // currentBeam.getNearOffNadir() +" && " +
-                    // absOffNadirAngle+" <= "+currentBeam.getFarOffNadir() );
+                     logger.debug("for beam "+currentBeam.getBeamName()+","+absOffNadirAngle + " >= " +
+                     currentBeam.getNearOffNadir() +" && " +
+                     absOffNadirAngle+" <= "+currentBeam.getFarOffNadir() );
 
                     if ((absOffNadirAngle >= currentBeam.getNearOffNadir()) && (absOffNadirAngle <= currentBeam.getFarOffNadir()))
                     {
@@ -567,7 +571,7 @@ public class AccessesEvaluator
                          * beamId, int orbitDirection, int orbitId, Vector3D
                          * satellitePos, Vector3D satelliteVel)
                          */
-                        // logger.debug("Found access");
+                        logger.debug("Found access");
                         access = new Access(satellite.getMissionName(), p, satellite, accessTime, absOffNadirAngle, lookSide, currentBeam, orbitDir,
                                 // s1.getIdOrbit(),
                                 evaluateOrbitNumber(satPosAtZeroDoppler), satPosAtZeroDoppler, satVelAtZeroDoppler, this.s1.getDataType(), startingPointWindowIndex);
@@ -600,6 +604,7 @@ public class AccessesEvaluator
                          */
                         if (checkAgainstPr && checkForPassThrough && satellite.checkLookSide(lookSide) && satellite.checkForPaw(access))
                         {
+                            logger.debug("add access");
 
                             satellite.addAccess(access);
                         }

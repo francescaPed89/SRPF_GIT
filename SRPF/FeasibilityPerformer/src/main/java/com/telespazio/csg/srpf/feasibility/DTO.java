@@ -1815,7 +1815,7 @@ public class DTO implements Cloneable
 		boolean retval = false;
 
 		PlatformActivityWindowBean currentPaw;
-logger.debug("PAW_Management : check for sat : "+this.sat.getMissionName());
+logger.debug("PAW_Management : check for mission : "+this.sat.getMissionName());
 logger.debug("PAW_Management : check for sat : "+this.sat.getName());
 
 		/**
@@ -2690,7 +2690,8 @@ logger.debug("PAW_Management : check for sat : "+this.sat.getName());
 	public String toString() {
 
 		String retString = "DTO [id=" + id + ", this.beamName  "+this.sarBeamName+", this.beam  "+this.getBeam()+",  startTime=" + DateUtils.fromCSKDateToDateTime(startTime) + ", stopTime="
-				+ DateUtils.fromCSKDateToDateTime(stopTime)+" this.nearOffNadir"+this.nearOffNadir+", this.farOff +"+this.farOffNadir+", corners=" + Arrays.toString(corners) + "";
+				+ DateUtils.fromCSKDateToDateTime(stopTime)+",  startTime CSK =" + startTime + ", stopTime CSK="
+						+ stopTime+" this.nearOffNadir"+this.nearOffNadir+", this.farOff +"+this.farOffNadir+", corners=" + Arrays.toString(corners) + "";
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 3; j++) {
 				retString = retString + (corners[i][j]) + " - ";

@@ -6,7 +6,7 @@
  
   <groupId>com.telespazio.csg</groupId>
   <artifactId>SRPF</artifactId>
-  <version>2.2.8p</version>
+  <version>2.2.12p</version>
   <packaging>pom</packaging>
  <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

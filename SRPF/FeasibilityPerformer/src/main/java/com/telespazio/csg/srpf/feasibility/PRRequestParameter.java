@@ -685,19 +685,22 @@ public class PRRequestParameter implements Cloneable
 		/**
 		 * List of beams on satellite for requested sensor mode
 		 */
+
 		List<BeamBean> satBeams = s.getBeams();
+		logger.debug("found  "+satBeams.size()+" beams for satellite.");
+
+		logger.debug("allowedBeamList for satellite : "+allowedBeamList);
+
 		BeamBean beam;
 		for (int i = 0; i < satBeams.size(); i++) {
 			beam = satBeams.get(i);
-			logger.debug("23062020 check for beam "+beam);
-			logger.debug("23062020 allowedBeamList "+allowedBeamList);
 
 			/**
 			 * For each beam in satlist beam check if the name is in the requested beam and
 			 * if so add to the list of valid beam
 			 */
 			if (checkIfStringIsInlist(beam.getBeamName(), allowedBeamList, true)) {
-				logger.debug("23062020 beam added. ");
+				logger.debug("beam "+beam.getIdBeam()+"added. ");
 
 				beams.add(beam);
 			}
@@ -2343,7 +2346,6 @@ public class PRRequestParameter implements Cloneable
 		 * if empty list true by default
 		 */
 		boolean retval = true;
-		logger.debug("toLowerCase " + toLowerCase);
 		for (String s : list) {
 
 			retval = false;
@@ -2352,13 +2354,11 @@ public class PRRequestParameter implements Cloneable
 			 */
 			if (toLowerCase) {
 				if (element.toLowerCase().equals(s.toLowerCase())) {
-					logger.debug("same beam toLowerCase ");
 
 					return true;
 				}
 			} else {
 				if (element.equals(s)) {
-					logger.debug("same beam  ");
 
 					return true;
 				}
