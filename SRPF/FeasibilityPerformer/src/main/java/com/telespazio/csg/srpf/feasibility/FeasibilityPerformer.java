@@ -48,6 +48,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -864,17 +865,12 @@ public class FeasibilityPerformer
 		 * validating doc against schema
 		 */
 		Schema schema = factory.newSchema(new File(this.xsdPath));
-		try
-		{
+		try {
 			schema.newValidator().validate(new DOMSource(this.doc));
-		}
-		catch(SAXException saxEx)
-		{
-			FeasibilityPerformer.logger.error("Exception in validate document_saxException: "+saxEx);
-		}
-		catch(IOException ex)
-		{
-			FeasibilityPerformer.logger.error("Exception in validate document_IOException: "+ex);
+		} catch (SAXException saxEx) {
+			FeasibilityPerformer.logger.error("Exception in validate document_saxException: " + saxEx);
+		} catch (IOException ex) {
+			FeasibilityPerformer.logger.error("Exception in validate document_IOException: " + ex);
 		}
 		FeasibilityPerformer.logger.debug("Parsed valid document");
 
@@ -921,9 +917,9 @@ public class FeasibilityPerformer
 		double startValidityTime = DateUtils.fromISOToCSKDate(request.getStartTime());
 		double stopValidityTime = DateUtils.fromISOToCSKDate(request.getStopTime());
 		double validityDuration = stopValidityTime - startValidityTime;
-		String validityTruncated = new DecimalFormat("#.###").format(validityDuration);		/**
-		 * True if the request is good
-		 */
+		String validityTruncated = new DecimalFormat("#.###").format(validityDuration); /**
+																						 * True if the request is good
+																						 */
 		boolean isGoodrequest = true;
 
 		/**
@@ -1226,7 +1222,7 @@ public class FeasibilityPerformer
 		} // end else
 
 		if (satBeamMap.entrySet().size() != 0) {
-			//logger.trace("beam found " + satBeamMap);
+			// logger.trace("beam found " + satBeamMap);
 
 			/**
 			 * If map not empty
@@ -1345,7 +1341,7 @@ public class FeasibilityPerformer
 			double upperTimeTorequest, double stopValidityTime) throws Exception {
 		PlatformActivityWindowBO pawBO;
 		pawBO = new PlatformActivityWindowBO();
-		
+
 		logger.debug("FROM METHOD filleSatListWithEphemerid");
 		/**
 		 * Paw map
@@ -1375,11 +1371,10 @@ public class FeasibilityPerformer
 
 			ArrayList<EpochBean> epochList = EphemeridInMemoryDB.getInstance().selectEpochs(s.getName(),
 					startValidityTime, upperTimeTorequest);
-			
+
 //			logger.debug("set epoch FROM filleSatListWithEphemerid");
 //    		logger.debug("upperTimeTorequest "+DateUtils.fromCSKDateToDateTime(upperTimeTorequest));
 
-    		
 			s.setEpochs(epochList);
 
 			if (epochList.size() == 0) {
@@ -1392,8 +1387,8 @@ public class FeasibilityPerformer
 			 * Retrieve PAW
 			 */
 			ArrayList<PlatformActivityWindowBean> pawList = satPawMap.get(s.getName());
-			logger.debug("PAW_MANAGEMENT setting for satellite"+s.getName());
-			logger.debug("PAW_MANAGEMENT setting paw list "+pawList);
+			logger.debug("PAW_MANAGEMENT setting for satellite" + s.getName());
+			logger.debug("PAW_MANAGEMENT setting paw list " + pawList);
 			if (pawList == null) {
 				pawList = new ArrayList<>();
 			}
@@ -1537,8 +1532,8 @@ public class FeasibilityPerformer
 		 * Retrieve the area from gridder
 		 */
 		double area = this.gridder.getAream2();
-		
-		String validityTruncated = new DecimalFormat("#.###").format(area / FeasibilityConstants.Mega);	
+
+		String validityTruncated = new DecimalFormat("#.###").format(area / FeasibilityConstants.Mega);
 
 		FeasibilityPerformer.logger.debug("Area of interest of : " + validityTruncated + " Km2");
 		double cskMaxArea = this.maxAreaOfInterest;
@@ -1591,8 +1586,7 @@ public class FeasibilityPerformer
 		/*
 		 * TODO mettere log path orbitali
 		 */
-		
-		
+
 		/**
 		 * Fille the satellite list
 		 */
@@ -1651,17 +1645,18 @@ public class FeasibilityPerformer
 			if (!request.isMinimumAoICoincidentWithAoI()) {
 				logger.debug("isMinimumAoICoincidentWithAoI = false");
 
-				//se ho inserito l'area minima -> fai check con minimum AOI, che se è interna o coincidente con area target restituisce true
+				// se ho inserito l'area minima -> fai check con minimum AOI, che se è interna o
+				// coincidente con area target restituisce true
 				this.di2SAvailabilityConfirmationFlag = ((PolygonGridder) this.gridder)
 						.insertCheckMinimumAoI(request.getMinimumAoI(), this.gridPointList);
-				
+
 			} else {
 				logger.debug("isMinimumAoICoincidentWithAoI = true");
 
-				//se non ho inserito l'area minima = coincidente con area target
+				// se non ho inserito l'area minima = coincidente con area target
 				this.di2SAvailabilityConfirmationFlag = true;
 			}
-			logger.debug("di2SAvailabilityConfirmationFlag : "+this.di2SAvailabilityConfirmationFlag);
+			logger.debug("di2SAvailabilityConfirmationFlag : " + this.di2SAvailabilityConfirmationFlag);
 
 		} // end if
 
@@ -1732,7 +1727,7 @@ public class FeasibilityPerformer
 		FeasibilityPerformer.logger.debug("Accesses evaluated");
 		Date dateAfterEvaluatingAccesses = new Date();
 		long gap = dateAfterEvaluatingAccesses.getTime() - dateBeforeEvaluatingAccesses.getTime();
-		FeasibilityPerformer.logger.debug("Accesses evaluated in "+gap/1000+" milliseconds");
+		FeasibilityPerformer.logger.debug("Accesses evaluated in " + gap / 1000 + " milliseconds");
 
 		int numberOfAccess = 0;
 		for (Satellite sat : this.satList) {
@@ -1743,27 +1738,23 @@ public class FeasibilityPerformer
 		}
 
 		FeasibilityPerformer.logger.debug("Found " + numberOfAccess + " accesses");
- 
-		FeasibilityPerformer.logger.debug("number of iterations : "+this.numberOfOuterIteration);
-		
-		if(numberOfAccess<5000)
-		{
-			this.numberOfOuterIteration = this.numberOfOuterIteration*20;
-			FeasibilityPerformer.logger.debug("number of iterations * 20 : "+this.numberOfOuterIteration);
 
-		}else if(numberOfAccess<10000)
-		{
-			this.numberOfOuterIteration = this.numberOfOuterIteration*10;
-			FeasibilityPerformer.logger.debug("number of iterations * 10 : "+this.numberOfOuterIteration);
+		FeasibilityPerformer.logger.debug("number of iterations : " + this.numberOfOuterIteration);
 
-		}
-		else if (numberOfAccess<15000)
-		{
-			this.numberOfOuterIteration = this.numberOfOuterIteration*2;
-			FeasibilityPerformer.logger.debug("number of iterations * 2 : "+this.numberOfOuterIteration);
+		if (numberOfAccess < 5000) {
+			this.numberOfOuterIteration = this.numberOfOuterIteration * 20;
+			FeasibilityPerformer.logger.debug("number of iterations * 20 : " + this.numberOfOuterIteration);
+
+		} else if (numberOfAccess < 10000) {
+			this.numberOfOuterIteration = this.numberOfOuterIteration * 10;
+			FeasibilityPerformer.logger.debug("number of iterations * 10 : " + this.numberOfOuterIteration);
+
+		} else if (numberOfAccess < 15000) {
+			this.numberOfOuterIteration = this.numberOfOuterIteration * 2;
+			FeasibilityPerformer.logger.debug("number of iterations * 2 : " + this.numberOfOuterIteration);
 
 		}
-		FeasibilityPerformer.logger.debug("number of iterations updated : "+this.numberOfOuterIteration);
+		FeasibilityPerformer.logger.debug("number of iterations updated : " + this.numberOfOuterIteration);
 		FeasibilityPerformer.logger.debug("INVOKING SPARC! from doFeasibility ");
 
 		/**
@@ -1776,11 +1767,9 @@ public class FeasibilityPerformer
 		 * Retrieving optimal ar list
 		 */
 		List<AcqReq> optimalAcqList = retVal.getAcquisitionRequestList();
-		
+
 		logger.debug("MODIFICA doFeasibility optimalAcqList returned as optimal " + optimalAcqList.size());
 		logger.debug("MODIFICA doFeasibility optimalAcqList returned as optimal " + optimalAcqList);
-
-
 
 //		List<Polygon> optimalAcqListPoly = createPolygonList(optimalAcqList);
 //		boolean pRDateLineBool = false;
@@ -1789,12 +1778,11 @@ public class FeasibilityPerformer
 //		intersectARs(optimalAcqListPoly, pRDateLineBool);
 
 		logger.debug("processOverlap ACTIVE");
-		
-		optimalAcqList = this.gridder.processOverlap(optimalAcqList);
-		
-		
 
-		logger.debug("MODIFICA doFeasibility optimalAcqList returned as optimal after processOverlapSIZE :" + optimalAcqList.size());
+		optimalAcqList = this.gridder.processOverlap(optimalAcqList);
+
+		logger.debug("MODIFICA doFeasibility optimalAcqList returned as optimal after processOverlapSIZE :"
+				+ optimalAcqList.size());
 
 		/**
 		 * performing repetivitve periodic request
@@ -1844,7 +1832,7 @@ public class FeasibilityPerformer
 			 */
 			if (optimalAcqList.size() != 0) {
 				FeasibilityPerformer.logger.debug("Adding response to XML");
-				// Check foer coverage
+				// Check for coverage
 				if (!algo.isSingleAcquired()
 						&& getPrStatusString(getUsedCoverage(optimalAcqList), request.getRequiredPercentageOfCoverage())
 								.equals(FeasibilityConstants.FailedStatusString)) {
@@ -2610,15 +2598,13 @@ public class FeasibilityPerformer
 			 * Using sparc
 			 */
 			logger.debug("BEFORE SPARC! optimalAcqList before " + optimalAcqList);
-			for(int i=0;i<optimalAcqList.size();i++)
-			{
+			for (int i = 0; i < optimalAcqList.size(); i++) {
 				ArrayList<DTO> listDto = optimalAcqList.get(i).getDTOList();
-				for(int j=0;j<listDto.size();j++)
-				{
+				for (int j = 0; j < listDto.size(); j++) {
 					DTO dto = listDto.get(j);
-					double gap = dto.getStopTime()-dto.getStartTime();
-					logger.debug("BEFORE SPARC!  DTO BEAM "+dto.getBeam().getBeamName());
-					logger.debug("BEFORE SPARC!  DTO DURATION :"+DateUtils.fromCSKDurationToMilliSeconds(gap));
+					double gap = dto.getStopTime() - dto.getStartTime();
+					logger.debug("BEFORE SPARC!  DTO BEAM " + dto.getBeam().getBeamName());
+					logger.debug("BEFORE SPARC!  DTO DURATION :" + DateUtils.fromCSKDurationToMilliSeconds(gap));
 				}
 			}
 
@@ -2640,7 +2626,7 @@ public class FeasibilityPerformer
 				SPARCManager sparc = new SPARCManager(sparcMode, request, optimalAcqList, this.prListWorkingDir,
 						this.dem, algo.isSingleAcquired(), this.gridder.isAcrossDateLine(),
 						this.di2SAvailabilityConfirmationFlag);
-				
+
 				optimalAcqList = sparc.getAcqList();
 
 				if (request.isPassThrough()) {
@@ -2650,20 +2636,16 @@ public class FeasibilityPerformer
 				logger.debug("INVOKING SPARC! optimalAcqList after SIZE" + optimalAcqList.size());
 				logger.debug("INVOKING SPARC! optimalAcqList after " + optimalAcqList);
 
-				coverage = getUsedCoverage(optimalAcqList);
+				if(optimalAcqList!=null && !optimalAcqList.isEmpty())
+				{
+					coverage = getUsedCoverage(optimalAcqList);
+				}
+				else
+				{
+					coverage = 0;
+				}
 				logger.debug("INVOKING SPARC! coverage after sparc " + coverage);
 
-				for(int i=0;i<optimalAcqList.size();i++)
-				{
-					ArrayList<DTO> listDto = optimalAcqList.get(i).getDTOList();
-					for(int j=0;j<listDto.size();j++)
-					{
-						DTO dto = listDto.get(j);
-						double gap = dto.getStopTime()-dto.getStartTime();
-						logger.debug("AFTER SPARC!  DTO BEAM "+dto.getBeam().getBeamName());
-						logger.debug("AFTER SPARC!  DTO DURATION :"+DateUtils.fromCSKDurationToMilliSeconds(gap));
-					}
-				}
 			} // end if
 
 			/**
@@ -2709,8 +2691,8 @@ public class FeasibilityPerformer
 		catch (Exception e) {
 
 			this.tracer.warning(EventType.SOFTWARE_EVENT, ProbableCause.SOFTWARE_ERROR,
-					" anormal ending of SPRC " + e.getMessage());
-			throw new FeasibilityException("Anormal ending of SPRC " + e.getMessage());
+					" anormal ending of SPARC " + e.getMessage());
+			throw new FeasibilityException("Anormal ending of SPARC " + e.getMessage());
 
 		}
 
@@ -3067,7 +3049,7 @@ public class FeasibilityPerformer
 			if (interferometricAcq != null) {
 				toBeAddedAcq.add(interferometricAcq);
 			} else {
-				logger.debug("REMOVED ACQREQ because it doesn't have interferometric DTO!"+a);
+				logger.debug("REMOVED ACQREQ because it doesn't have interferometric DTO!" + a);
 				toBeRemovedAcq.add(a);
 			}
 
@@ -3591,11 +3573,11 @@ public class FeasibilityPerformer
 					DateUtils.fromISOToCSKDate(request.getStopTime()));
 			algo = algo2;
 		}
-		
+
 		/*
 		 * modifica dinamica number of iterations
 		 */
-		
+
 		/**
 		 * Performing the optimization loop
 		 */
@@ -3928,21 +3910,89 @@ public class FeasibilityPerformer
 		 */
 		double requiredCoverage = prParam.getRequiredPercentageOfCoverage();
 		double coverage = 100.0;
-		//if (!isSingleAcquired) {
-			coverage = getUsedCoverage(acqList);
-			if(coverage==100.0)
-			{
-				isSingleAcquired=true;
+
+		/*
+		 * 03.09.2020 inizio metodo nuovo per gestione coverage
+		 */
+		List<AcqReq> totalAndPartialAcqReq = new ArrayList<AcqReq>();
+		List<AcqReq> partialAcqReq = new ArrayList<AcqReq>();
+		int total = 0;
+		int partial = 0;
+		double local_coverage = 0;
+		logger.debug("03092020 lista ottimale : "+acqList);
+		// per ogni dto della lista ottimale
+		for (int i = 0; i < acqList.size(); i++) {
+			// crea lista con solo l'elemento i-esimo
+			List<AcqReq> singleAcqReq = new ArrayList<AcqReq>();
+
+			singleAcqReq.add(acqList.get(i));
+
+			// calcola coverage
+			local_coverage = getUsedCoverage(singleAcqReq);
+			logger.debug("03092020 local_coverage : "+local_coverage);
+
+			// se coverage = 0 -> elimino da soluzione ottimale
+			if (local_coverage > 0) {
+				// se coverage >= required
+				if (local_coverage >= prParam.getRequiredPercentageOfCoverage()) {
+					// -> aggiorna contatore total++
+					total++;
+			           logger.debug("total++ : ");
+
+				}
+				// altrimenti aggiorna partial++
+				else {
+					partial++;
+					// aggiungi a lista eventualmente da rimuovere, se total >0
+					partialAcqReq.add(acqList.get(i));
+                    logger.debug("partial++ : ");
+
+				}
+				// aggiunto a soluzione ottimale filtrata
+				totalAndPartialAcqReq.add(acqList.get(i));
 			}
-		//}
+
+		}
 		
+		local_coverage = getUsedCoverage(totalAndPartialAcqReq);
+        // se total > 0
+        if (total > 0) {
+            // rimuovi tutto partial ->  coverage restituita è il
+            // maggiore delle coverage total -> marca come total
+            logger.debug("remove all partial : "+totalAndPartialAcqReq);
+
+            totalAndPartialAcqReq.removeAll(partialAcqReq);
+            local_coverage = getUsedCoverage(totalAndPartialAcqReq);
+            logger.debug("removed partial : "+totalAndPartialAcqReq);
+            getPrStatusString(local_coverage, requiredCoverage);
+
+        } else if (partial > 0) {
+            // se partial >0 coverage restituita è il maggiore delle coverage partial -> se
+            // coverage > required ->total
+            getPrStatusString(local_coverage, requiredCoverage);
+        } else {
+
+        }
+
+        // override optimal solution
+        acqList = totalAndPartialAcqReq;
+
+		coverage = getUsedCoverage(acqList);
+
+		if (coverage == 100.0 && acqList.size() == 1) {
+			isSingleAcquired = true;
+		}
+		if (isSingleAcquired) {
+			coverage = findCorrectCoverage(acqList);
+		}
+
 		for (AcqReq a : acqList) {
 			/**
 			 * Dumpig AR
 			 */
 			dumpAcqReqInXML(programmingRequestNode, a, prParam, isSingleAcquired);
 		}
-		
+
 		// TODO Evaluate SUF:May be it should be commented
 		/**
 		 * Dumping FA section
@@ -3960,8 +4010,6 @@ public class FeasibilityPerformer
 		Element status = XMLUtils.createElement(this.doc, this.namespaceMap, FeasibilityConstants.statusTagName,
 				FeasibilityConstants.statusTagNameNS);
 		prStatus.appendChild(status);
-
-
 
 		// String statusString = FeasibilityConstants.FailedStatusString;
 
@@ -4010,6 +4058,20 @@ public class FeasibilityPerformer
 		// bcoverage));
 
 	}// end addResponseToXML
+
+	private double findCorrectCoverage(List<AcqReq> acqList) throws GridException {
+
+		double maxCoverage = 0;
+		double localMax = 0;
+		for (int i = 0; i < acqList.size(); i++) {
+			List<AcqReq> singleAcqList = new ArrayList<AcqReq>(Arrays.asList(acqList.get(i)));
+			localMax = getUsedCoverage(singleAcqList);
+			if (localMax > maxCoverage) {
+				maxCoverage = localMax;
+			}
+		}
+		return maxCoverage;
+	}
 
 	/**
 	 * Return the coverage to be used in response
@@ -4268,14 +4330,14 @@ public class FeasibilityPerformer
 		 */
 		if (prParam.isDi2sAvailabilityFlag()) {
 			if (this.di2SAvailabilityConfirmationFlag) {
-				
-				logger.debug("isSingleAcquired ???"+isSingleAcquired);
+
+				logger.debug("isSingleAcquired ???" + isSingleAcquired);
 
 				// The confirmation flag holds true only in case of single
 				// acquired
 				this.di2SAvailabilityConfirmationFlag = isSingleAcquired;
-				
-				logger.debug("so this.di2SAvailabilityConfirmationFlag "+this.di2SAvailabilityConfirmationFlag );
+
+				logger.debug("so this.di2SAvailabilityConfirmationFlag " + this.di2SAvailabilityConfirmationFlag);
 
 			}
 			/**
@@ -4285,11 +4347,11 @@ public class FeasibilityPerformer
 					FeasibilityConstants.DI2SAvailabilityConfirmationTagName,
 					FeasibilityConstants.DI2SAvailabilityConfirmationTagNameNS);
 			if (this.di2SAvailabilityConfirmationFlag) {
-				logger.debug("set DI2SAvailabilityConfirmationTrueValue " );
+				logger.debug("set DI2SAvailabilityConfirmationTrueValue ");
 
 				disConfirmationFlagElement.setTextContent(FeasibilityConstants.DI2SAvailabilityConfirmationTrueValue);
 			} else {
-				logger.debug("set DI2SAvailabilityConfirmationFalseValue " );
+				logger.debug("set DI2SAvailabilityConfirmationFalseValue ");
 
 				disConfirmationFlagElement.setTextContent(FeasibilityConstants.DI2SAvailabilityConfirmationFalseValue);
 			}
@@ -4301,7 +4363,7 @@ public class FeasibilityPerformer
 		 */
 		pr.appendChild(AR);
 		// logger.info("AR Dumped");
-		
+
 	}// end method
 
 	/**

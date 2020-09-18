@@ -2,12 +2,12 @@
   <parent>
     <groupId>com.telespazio.csg</groupId>
     <artifactId>SRPF</artifactId>
-    <version>2.2.12p</version>
+    <version>2.2.13p</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.telespazio.csg.srpf</groupId>
   <artifactId>dem</artifactId>
-  <version>2.2.12p</version>
+  <version>2.2.13p</version>
   <name>Implementazione dem TPZ</name>
   <build>
     <testResources>
@@ -41,7 +41,7 @@
         <dependency>
 		<groupId>com.telespazio.csg.srpf</groupId>
        		 <artifactId>eventlog</artifactId>
-       		<version>2.2.12p</version>
+       		<version>2.2.13p</version>
         </dependency>
   	<dependency>
 	<groupId>org.slf4j</groupId>

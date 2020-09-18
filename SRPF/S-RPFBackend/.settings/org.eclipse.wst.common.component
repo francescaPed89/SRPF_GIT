@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-	<wb-module deploy-name="S-RPFBackend-2.2.12p">
+	<wb-module deploy-name="S-RPFBackend-2.2.13p">
 		<wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
 		<wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
 		<wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <dependent-module archiveName="feasibilityPerformer-2.2.12p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/feasibilityPerformer/feasibilityPerformer">
+        <dependent-module archiveName="feasibilityPerformer-2.2.13p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/feasibilityPerformer/feasibilityPerformer">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="eventlog-2.2.12p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/eventlog/eventlog">
+        <dependent-module archiveName="eventlog-2.2.13p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/eventlog/eventlog">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="DATAManager-2.2.12p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/DATAManager/DATAManager">
+        <dependent-module archiveName="DATAManager-2.2.13p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/DATAManager/DATAManager">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="utils-2.2.12p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/utils/utils">
+        <dependent-module archiveName="utils-2.2.13p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/utils/utils">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="dem-2.2.12p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/dem/dem">
+        <dependent-module archiveName="dem-2.2.13p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/dem/dem">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="SUFCalculator-2.2.12p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/SUFCalculator/SUFCalculator">
+        <dependent-module archiveName="SUFCalculator-2.2.13p.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/SUFCalculator/SUFCalculator">
             <dependency-type>uses</dependency-type>
         </dependent-module>
 		<property name="context-root" value="S-RPFBackend"/>

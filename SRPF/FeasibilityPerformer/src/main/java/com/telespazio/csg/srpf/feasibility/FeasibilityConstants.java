@@ -669,7 +669,7 @@ public class FeasibilityConstants
     public final static String DI2SAvailabilityTagNameNS = CommonNS;
 
     public final static String DI2SAvailabilityTrueValue = "true";
-    // public final static String DI2SAvailabilityFalseValue="false";
+    public final static String DI2SAvailabilityFalseValue="false";
     // XML TAG
     public final static String DI2SAvailabilityConfirmationTagName = "DI2SAvailabilityConfirmation";
     public final static String DI2SAvailabilityConfirmationTagNameNS = CommonNS;

@@ -685,7 +685,7 @@ public class PolygonGridder implements Gridder
 //
 //						logger.debug("localAcqReq size : " + localAcqReq);
 
-						localCoverage = getCoverage(localAcqReq);
+						localCoverage = getCoverageDtoInsideAR(localAcqReq);
 
 //						logger.debug("localCoverage : " + localCoverage);
 
@@ -722,7 +722,7 @@ public class PolygonGridder implements Gridder
 //
 //						logger.debug("localAcqReq size : " + localAcqReq);
 
-						localCoverage = getCoverage(localAcqReq);
+						localCoverage = getCoverageDtoInsideAR(localAcqReq);
 
 //						logger.debug("localCoverage : " + localCoverage);
 
@@ -923,6 +923,96 @@ public class PolygonGridder implements Gridder
 				polygonsList.add(GeometryPrecisionReducer.reduce(p, new PrecisionModel()));
 			} // end For
 
+			
+			if(!polygonsList.isEmpty())
+			{
+				// logger.debug("Unioning");
+				/**
+				 * Buiding union of AR Polygon
+				 */
+				Geometry dtoUnion = UnaryUnionOp.union(polygonsList);
+				// logger.debug("Intersecting");
+
+				Geometry reducedPolygon;
+				if (this.multiGeometry != null) {
+					/**
+					 * Area of target Case extension reducing to avoid intersection problems
+					 */
+					reducedPolygon = GeometryPrecisionReducer.reduce(this.multiGeometry, new PrecisionModel());
+					area = this.multiGeometry.getArea();
+				} else {
+					/**
+					 * Area of target Case Feasibility reducing to avoid intersection problems
+					 */
+					reducedPolygon = GeometryPrecisionReducer.reduce(this.polygon, new PrecisionModel());
+					area = this.polygon.getArea();
+				}
+
+				Geometry intersection;
+
+				/**
+				 * Intersect AR Polygon Union with target Area
+				 */
+				intersection = dtoUnion.intersection(reducedPolygon);
+				/**
+				 * Evaluating area of intersection
+				 */
+				double intecectedArea = intersection.getArea();
+
+				/**
+				 * Evaluating coverage
+				 */
+
+				retval = intecectedArea / area;
+			}
+
+
+		} // end try
+		catch (Exception e) {
+			// System.err.println(e.getMessage());
+			/**
+			 * Error just throw
+			 */
+			throw new GridException(e.getMessage());
+		} // end catch
+
+		return retval;
+	}// end method
+
+	
+	
+	/*
+	 * 
+	 * MODIFICA 03092020
+	 * 
+	 * 
+	 */
+	
+	
+	public double getCoverageDtoInsideAR(List<AcqReq> arList) throws GridException {
+		// this.tracer.debug("Evaluating coverage");
+		/**
+		 * value to be returned
+		 */
+		double retval = 0;
+		try {
+			double area;
+			List<Geometry> polygonsList = new ArrayList<>();
+			Geometry p;
+			for (AcqReq a : arList) {
+				for(int i=0;i<a.getDTOList().size();i++)
+				{
+					/**
+					 * For each AR evaluate polygon and add to list of polygon reducing to avoid
+					 * intersection problems
+					 */
+					p = getPolygonFromDtoInsideAR(a.getDTOList().get(i));
+					
+					polygonsList.add(GeometryPrecisionReducer.reduce(p, new PrecisionModel()));
+				}
+
+			} // end For
+
 			// logger.debug("Unioning");
 			/**
 			 * Buiding union of AR Polygon
@@ -974,6 +1064,30 @@ public class PolygonGridder implements Gridder
 		return retval;
 	}// end method
 
+
+	/**
+	 * Return a polygon from the first DTO of the AR
+	 *
+	 * @param ar
+	 * @return polygon
+	 */
+	protected Polygon getPolygonFromDtoInsideAR(DTO dto) {
+		/**
+		 * return value
+		 */
+		Polygon retval = null;
+		
+		//MODIFICA 31/08 iterare sulla lista di DTO dell'ar e creare un poligono con l'unione di tutti i corner delle dto dell'ar.
+		double[][] corners = dto.getCorners();
+		/**
+		 * buiding polygon
+		 */
+		retval = getPolygonFromCorners(corners);
+		return retval;
+	}// end getPolygonFromAR
+
+	
+	
 	/**
 	 * Return the area in m2 of the enclosing target area used to check against
 	 * Maxarea allowed
@@ -1043,6 +1157,8 @@ public class PolygonGridder implements Gridder
 		 * return value
 		 */
 		Polygon retval = null;
+		
+		//MODIFICA 31/08 iterare sulla lista di DTO dell'ar e creare un poligono con l'unione di tutti i corner delle dto dell'ar.
 		double[][] corners = ar.getDTOList().get(0).getCorners();
 		/**
 		 * buiding polygon

@@ -52,6 +52,8 @@ import com.telespazio.csg.srpf.logging.TraceManager;
 import com.telespazio.csg.srpf.logging.constants.EventType;
 import com.telespazio.csg.srpf.logging.constants.ProbableCause;
 
+import java.util.logging.Level;
+
 /**
  * It modelizes a Satellite Pass Data Abstract Object
  * 
@@ -62,13 +64,14 @@ import com.telespazio.csg.srpf.logging.constants.ProbableCause;
 public class SatellitePassDAO extends GenericDAO
 
 {
+	static final Logger logger = LogManager.getLogger(SatellitePassDAO.class.getName());
 
     /**
      * log object
      */
     private TraceManager tm = new TraceManager();
 
-    /**
+  /**
      * Insert statement
      */
     private static final String SatellitePassInsert = "INSERT INTO SATELLITE_PASS (ID,SATELLITE, ASID,CONTACT_COUNTER, VISIBILITY_START_TIME, VISIBILITY_STOP_TIME) " + "VALUES (SATELLITE_PASS_SEQ.nextval,?,?,?,?,?)";
@@ -96,7 +99,6 @@ public class SatellitePassDAO extends GenericDAO
 
     {
 
-        this.tm.debug("inside SatellitePassDAO.uploadsatellitePassList");
         Map<String, Integer> satelliteMap = getSatelliteMapID();
         // delete pass plan
         deleleSatellitePassList(satellitePassList, satelliteMap);
@@ -105,17 +107,28 @@ public class SatellitePassDAO extends GenericDAO
         try
 
         {
-    		if(con==null || con.isClosed())
-    		{
-    			con = super.initConnection();
-    		}
-            con.setAutoCommit(false); // no autocommit
-            insertStatement = con.prepareStatement(SatellitePassInsert);
+            System.out.println("before execute query");
+
+            System.out.println("after execute query "+SatellitePassInsert);
+
             // looping on pass
             for (SatellitePassBean satPass : satellitePassList)
             {
+				if (con == null || con.isClosed()) {
+
+					con = initConnection();
+					
+					}
+					con.setAutoCommit(false);
+		            insertStatement = con.prepareStatement(SatellitePassInsert);
+
+            	System.out.println("satPass.getSatelliteName()"+satPass.getSatelliteName()+satelliteMap);
+
+            	System.out.println("satelliteMap"+satelliteMap);
 
                 Integer satelliteId = satelliteMap.get(satPass.getSatelliteName());
+                System.out.println("before satelliteId"+satelliteId);
+
                 // if no satellite throw
                 if (satelliteId == null)
                 {
@@ -128,11 +141,14 @@ public class SatellitePassDAO extends GenericDAO
                 insertStatement.setDouble(4, satPass.getVisibiliyStart());
                 insertStatement.setDouble(5, satPass.getVisibilityStop());
                 // executing update
-                insertStatement.executeUpdate();
+                System.out.println("before executeUpdate "+insertStatement);
 
+                insertStatement.executeUpdate();
+                System.out.println("after executeUpdate "+insertStatement);
+                insertStatement.close();
             } // end for
 
-            this.tm.debug("Inserted " + satellitePassList.size() + " entries");
+            System.out.println("Inserted " + satellitePassList.size() + " entries");
         } // end try
 
         catch (NoSuchElementException e)
@@ -149,7 +165,8 @@ public class SatellitePassDAO extends GenericDAO
         {
             // close statement
             closeStatement(insertStatement);
-            con.close();
+			con.close();
+
         } // end finally
 
         this.tm.debug("Data inserted");
@@ -258,9 +275,9 @@ public class SatellitePassDAO extends GenericDAO
                 String deleteString = "delete from SATELLITE_PASS where SATELLITE=" + satelliteId.intValue() + " and ASID=" + satPass.getAsId() + " and CONTACT_COUNTER=" + satPass.getCntactCounter();
                 deleteStatement = con.createStatement();
                 deleteStatement.executeUpdate(deleteString);
-                closeStatement(deleteStatement);
+       
             } // end for
-
+            closeStatement(deleteStatement);
         } // end try
         catch (Exception e)
         {

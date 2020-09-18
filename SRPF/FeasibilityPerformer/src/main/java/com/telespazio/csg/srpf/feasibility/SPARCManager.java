@@ -368,7 +368,8 @@ public class SPARCManager
 				String checkSumPath = value + "/md5sum.txt";
 				logger.debug("SPARC CHECKSUM PATH : "+checkSumPath);
 				File file = new File(checkSumPath);
-
+ comincia 8202 - 0a84 
+ //file auth di sparc finisce con f622 
 				BufferedReader br = new BufferedReader(new FileReader(file));
 
 				String st;
